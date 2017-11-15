@@ -5,6 +5,8 @@ UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorCompo
 {
 	bWantsInitializeComponent = true;
 	bAutoActivate = true;
+
+	DeviceGroup = EnumerateDevices();
 }
 
 bool UOpenCLComponent::HasValidHardware()
@@ -27,4 +29,14 @@ TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
 void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& InputArgs /*= TEXT("")*/)
 {
 
+}
+
+void UOpenCLComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+}
+
+void UOpenCLComponent::UninitializeComponent()
+{
+	Super::UninitializeComponent();
 }

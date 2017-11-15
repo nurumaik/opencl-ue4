@@ -9,13 +9,13 @@ struct OPENCL_API FOpenCLDeviceData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "OpenCL Device Data")
 	FString DeviceName;
 
 	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
 	FString DeviceId;
 
-	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "OpenCL Device Data")
 	FString Platform;
 
 	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
