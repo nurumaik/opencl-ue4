@@ -12,6 +12,9 @@ class OpenCLPlugin : public IOpenCLPlugin
 IMPLEMENT_MODULE( OpenCLPlugin, OpenCL )
 DEFINE_LOG_CATEGORY(LogOpenCL);
 
+/*#define CLLog(text) UE_LOG(LogOpenCL, Log, text)
+#define CLWarn(text) UE_LOG(LogOpenCL, Warning, text)*/
+
 void OpenCLPlugin::StartupModule()
 {
 	UE_LOG(LogOpenCL, Log, TEXT("OpenCL Info:"));
@@ -70,11 +73,9 @@ void OpenCLPlugin::StartupModule()
 							sizeof(MaxComputeUnits), &MaxComputeUnits, NULL);
 			UE_LOG(LogOpenCL, Log, TEXT("    Parallel compute units: %d"), MaxComputeUnits);
 		}
-
 		free(Devices);
 
 	}
-
 	free(Platforms);
 }
 
