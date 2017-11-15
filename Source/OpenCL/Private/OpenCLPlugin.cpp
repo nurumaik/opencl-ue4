@@ -1,6 +1,8 @@
 // Copyright 1998-2014 Epic Games, Inc. All Rights Reserved.
 
-#include "OpenCLPluginPrivatePCH.h"
+#include "ModuleManager.h"
+#include "IOpenCLPlugin.h"
+#include "CL/opencl.h"
 
 class OpenCLPlugin : public IOpenCLPlugin
 {
@@ -11,9 +13,6 @@ class OpenCLPlugin : public IOpenCLPlugin
 
 IMPLEMENT_MODULE( OpenCLPlugin, OpenCL )
 DEFINE_LOG_CATEGORY(LogOpenCL);
-
-/*#define CLLog(text) UE_LOG(LogOpenCL, Log, text)
-#define CLWarn(text) UE_LOG(LogOpenCL, Warning, text)*/
 
 void OpenCLPlugin::StartupModule()
 {

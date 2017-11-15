@@ -18,6 +18,9 @@ namespace UnrealBuildTool.Rules
 
         public OpenCL(ReadOnlyTargetRules Target) : base(Target)
         {
+            //PCHUsage = PCHUsageMode.NoSharedPCHs;
+            PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
             PublicIncludePaths.AddRange(new string[] {
                 "OpenCL/Public",
                 Path.Combine(ThirdPartyPath, "OpenCL", "Include")
