@@ -4,6 +4,7 @@
 #include "IOpenCLPlugin.h"
 #include "CL/opencl.h"
 #include "OCLUtility.h"
+#include <string>	//this needs to be included to change how char* works
 
 class OpenCLPlugin : public IOpenCLPlugin
 {
@@ -152,6 +153,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	cl_mem MemObj = nullptr;
 	cl_program Program = nullptr;
 	cl_kernel Kernel = nullptr;
+	TArray<uint8> SourceCharArray;
 	const int32 MemSize = 128;
 
 	Context = clCreateContext(NULL, 1, &DeviceId, NULL, NULL, &Ret);
@@ -163,9 +165,14 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	MemObj = clCreateBuffer(Context, CL_MEM_READ_WRITE, MemSize * sizeof(char), NULL, &Ret);
 
 	/* Create Kernel Program from the source */
-	char* SourceStr = FOCLUtility::FStringToStdChar(KernelString);
-	size_t SourceLen = KernelString.Len();
-	Program = clCreateProgramWithSource(Context, 1, (const char **)&SourceStr, (const size_t *)&SourceLen, &Ret);
+
+	//We need a separately allocated char array.
+	SourceCharArray = FOCLUtility::FStringToCharArray(KernelString);
+
+	const size_t SourceLen = KernelString.Len();
+	const char* SourceStr = (char*)SourceCharArray.GetData();
+	
+	Program = clCreateProgramWithSource(Context, 1, &SourceStr, &SourceLen, &Ret);
 
 	/* Build Kernel Program */
 	Ret = clBuildProgram(Program, 1, &DeviceId, NULL, NULL, NULL);
@@ -213,6 +220,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	Ret = clReleaseMemObject(MemObj);
 	Ret = clReleaseCommandQueue(CommandQueue);
 	Ret = clReleaseContext(Context);
+	//free(SourceStr);
 
 	/*for (auto& Device : DeviceGroup)
 	{

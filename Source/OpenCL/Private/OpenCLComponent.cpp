@@ -49,6 +49,7 @@ void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& Inp
 void UOpenCLComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
+	DeviceGroup = EnumerateDevices();
 }
 
 void UOpenCLComponent::UninitializeComponent()

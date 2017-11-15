@@ -4,5 +4,5 @@ class FOCLUtility
 {
 public:
 	/** Correctly convert FStrings to OpenCL char* */
-	static char* FStringToStdChar(const FString& InString);
+	static TArray<uint8> FStringToStdChar(const FString& InString);
 };
