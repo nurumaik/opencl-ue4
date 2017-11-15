@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ModuleManager.h"
+#include "OCLData.h"
 
 
 /**
@@ -22,7 +23,7 @@ public:
 	 */
 	static inline IOpenCLPlugin& Get()
 	{
-		return FModuleManager::LoadModuleChecked<IOpenCLPlugin>("OpenCLPlugin");
+		return FModuleManager::LoadModuleChecked<IOpenCLPlugin>("OpenCL");
 	}
 
 	/**
@@ -32,8 +33,12 @@ public:
 	 */
 	static inline bool IsAvailable()
 	{
-		return FModuleManager::Get().IsModuleLoaded("OpenCLPLugin");
+		return FModuleManager::Get().IsModuleLoaded("OpenCL");
 	}
+
+	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) {};
+	virtual void RunKernel(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback) {};
+
 };
 
 DECLARE_LOG_CATEGORY_EXTERN(LogOpenCL, Log, All);

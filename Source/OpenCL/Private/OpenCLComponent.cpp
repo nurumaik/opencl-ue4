@@ -1,4 +1,5 @@
 #include "OpenCLComponent.h"
+#include "IOpenCLPlugin.h"
 
 UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorComponent(init)
 {
@@ -8,7 +9,19 @@ UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorCompo
 
 bool UOpenCLComponent::HasValidHardware()
 {
-	return false;
+	TArray<FOpenCLDeviceData> Devices = EnumerateDevices();
+	IOpenCLPlugin::Get().EnumerateDevices(Devices);
+	return Devices.Num() > 0;
+}
+
+TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
+{
+	TArray<FOpenCLDeviceData> Devices;
+	if (IOpenCLPlugin::Get().IsAvailable())
+	{
+		IOpenCLPlugin::Get().EnumerateDevices(Devices);
+	}
+	return Devices;
 }
 
 void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& InputArgs /*= TEXT("")*/)

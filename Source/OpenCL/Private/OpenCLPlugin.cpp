@@ -9,6 +9,13 @@ class OpenCLPlugin : public IOpenCLPlugin
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+
+	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) override;
+	virtual void RunKernel(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback) override;
+
+private:
+	TArray<FOpenCLDeviceData> Devices;
+	bool bHasEnumeratedOnce;
 };
 
 IMPLEMENT_MODULE( OpenCLPlugin, OpenCL )
@@ -16,7 +23,28 @@ DEFINE_LOG_CATEGORY(LogOpenCL);
 
 void OpenCLPlugin::StartupModule()
 {
+	//Enumerate once on startup
+	bHasEnumeratedOnce = false;
+	EnumerateDevices(Devices);
+
+	//Log all devices
 	UE_LOG(LogOpenCL, Log, TEXT("OpenCL Info:"));
+	for (auto Device : Devices)
+	{
+		UE_LOG(LogOpenCL, Log, TEXT("%s"), *Device.ToPrintString());
+	}
+}
+
+void OpenCLPlugin::ShutdownModule() {}
+
+
+void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh /*= false*/)
+{
+	if (bHasEnumeratedOnce && !bForceRefresh)
+	{
+		OutDevices = Devices;
+		return;
+	}
 
 	cl_uint i, j;
 	char* Value;
@@ -31,11 +59,13 @@ void OpenCLPlugin::StartupModule()
 	Platforms = (cl_platform_id*)malloc(sizeof(cl_platform_id) * NumPlatforms);
 	clGetPlatformIDs(NumPlatforms, Platforms, NULL);
 
+	//For each platform
 	for (i = 0; i < NumPlatforms; i++) {
+
 		clGetPlatformInfo(Platforms[i], CL_PLATFORM_NAME, 0, NULL, &ValueSize);
 		Value = (char*)malloc(ValueSize);
 		clGetPlatformInfo(Platforms[i], CL_PLATFORM_NAME, ValueSize, Value, NULL);
-		UE_LOG(LogOpenCL, Log, TEXT("Platform: %s"), ANSI_TO_TCHAR(Value));
+		FString EnumeratedPlatform = FString(ANSI_TO_TCHAR(Value));
 		free(Value);
 
 		// get all Devices
@@ -43,39 +73,52 @@ void OpenCLPlugin::StartupModule()
 		Devices = (cl_device_id*)malloc(sizeof(cl_device_id) * NumDevices);
 		clGetDeviceIDs(Platforms[i], CL_DEVICE_TYPE_ALL, NumDevices, Devices, NULL);
 
+		//For each device
 		for (j = 0; j < NumDevices; j++) {
+			FOpenCLDeviceData Device;
+			Device.Platform = EnumeratedPlatform;
+
 			clGetDeviceInfo(Devices[j], CL_DEVICE_NAME, 0, NULL, &ValueSize);
 			Value = (char*)malloc(ValueSize);
 			clGetDeviceInfo(Devices[j], CL_DEVICE_NAME, ValueSize, Value, NULL);
-			UE_LOG(LogOpenCL, Log, TEXT("  Device: %s"), ANSI_TO_TCHAR(Value));
+			Device.DeviceName = ANSI_TO_TCHAR(Value);
 			free(Value);
 
 			clGetDeviceInfo(Devices[j], CL_DEVICE_VERSION, 0, NULL, &ValueSize);
 			Value = (char*)malloc(ValueSize);
 			clGetDeviceInfo(Devices[j], CL_DEVICE_VERSION, ValueSize, Value, NULL);
-			UE_LOG(LogOpenCL, Log, TEXT("    Hardware version: %s"), ANSI_TO_TCHAR(Value));
+			Device.HardwareVersion = ANSI_TO_TCHAR(Value);
 			free(Value);
 
 			clGetDeviceInfo(Devices[j], CL_DRIVER_VERSION, 0, NULL, &ValueSize);
 			Value = (char*)malloc(ValueSize);
 			clGetDeviceInfo(Devices[j], CL_DRIVER_VERSION, ValueSize, Value, NULL);
-			UE_LOG(LogOpenCL, Log, TEXT("    Software version: %s"), ANSI_TO_TCHAR(Value));
+			Device.SoftwareVersion = ANSI_TO_TCHAR(Value);
 			free(Value);
 
 			clGetDeviceInfo(Devices[j], CL_DEVICE_OPENCL_C_VERSION, 0, NULL, &ValueSize);
 			Value = (char*)malloc(ValueSize);
 			clGetDeviceInfo(Devices[j], CL_DEVICE_OPENCL_C_VERSION, ValueSize, Value, NULL);
-			UE_LOG(LogOpenCL, Log, TEXT("    OpenCL C version: %s"), ANSI_TO_TCHAR(Value));
+			Device.OpenCLVersion = ANSI_TO_TCHAR(Value);
 			free(Value);
 
 			clGetDeviceInfo(Devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
-							sizeof(MaxComputeUnits), &MaxComputeUnits, NULL);
-			UE_LOG(LogOpenCL, Log, TEXT("    Parallel compute units: %d"), MaxComputeUnits);
+				sizeof(MaxComputeUnits), &MaxComputeUnits, NULL);
+			Device.ParallelComputeUnits = MaxComputeUnits;
+			OutDevices.Add(Device);
 		}
 		free(Devices);
 
 	}
 	free(Platforms);
+
+	if (!bHasEnumeratedOnce)
+	{
+		bHasEnumeratedOnce;
+	}
 }
 
-void OpenCLPlugin::ShutdownModule() {}
+void OpenCLPlugin::RunKernel(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback)
+{
+
+}
