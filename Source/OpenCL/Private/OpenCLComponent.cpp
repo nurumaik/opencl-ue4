@@ -26,6 +26,15 @@ TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
 	return Devices;
 }
 
+FString UOpenCLComponent::ReadKernelFromFile(const FString& ProjectRelativePath)
+{
+	FString AbsolutePath = FPaths::ProjectContentDir() + ProjectRelativePath;
+	
+	FString ResultString;
+	FFileHelper::LoadFileToString(ResultString, *AbsolutePath);
+	return ResultString;
+}
+
 void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& InputArgs /*= TEXT("")*/)
 {
 	if (IOpenCLPlugin::Get().IsAvailable())

@@ -28,6 +28,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
 	TArray<FOpenCLDeviceData> EnumerateDevices();
 
+	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
+	FString ReadKernelFromFile(const FString& ProjectRelativePath);
+
 	/** Run specified kernel on the current device group with passed in arguments */
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
 	void RunOpenCLKernel(const FString& Kernel, const FString& InputArgs = TEXT(""));
