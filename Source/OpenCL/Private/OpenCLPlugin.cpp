@@ -3,6 +3,7 @@
 #include "ModuleManager.h"
 #include "IOpenCLPlugin.h"
 #include "CL/opencl.h"
+#include "OCLUtility.h"
 
 class OpenCLPlugin : public IOpenCLPlugin
 {
@@ -128,7 +129,90 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 
 void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& DeviceGroup)
 {
+	if (DeviceGroup.Num() == 0)
+	{
+		UE_LOG(LogOpenCL, Log, TEXT("RunKernelOnDevices:: No devices found in devicegroup."));
+		return;
+	}
 	//grab top level device for now
+	const FOpenCLDeviceData& Device = DeviceGroup[0];
+
+	cl_device_id DeviceId = (cl_device_id)Device.RawDeviceId;
+
+	if (DeviceId == nullptr)
+	{
+		UE_LOG(LogOpenCL, Log, TEXT("Invalid device id"));
+		return;	//todo: continue/skip
+	}
+
+	/* Create OpenCL context */
+	cl_int Ret;
+	cl_context Context = nullptr;
+	cl_command_queue CommandQueue = nullptr;
+	cl_mem MemObj = nullptr;
+	cl_program Program = nullptr;
+	cl_kernel Kernel = nullptr;
+	const int32 MemSize = 128;
+
+	Context = clCreateContext(NULL, 1, &DeviceId, NULL, NULL, &Ret);
+
+	/* Create Command Queue */
+	CommandQueue = clCreateCommandQueue(Context, DeviceId, 0, &Ret);
+
+	/* Create Memory Buffer */
+	MemObj = clCreateBuffer(Context, CL_MEM_READ_WRITE, MemSize * sizeof(char), NULL, &Ret);
+
+	/* Create Kernel Program from the source */
+	char* SourceStr = FOCLUtility::FStringToStdChar(KernelString);
+	size_t SourceLen = KernelString.Len();
+	Program = clCreateProgramWithSource(Context, 1, (const char **)&SourceStr, (const size_t *)&SourceLen, &Ret);
+
+	/* Build Kernel Program */
+	Ret = clBuildProgram(Program, 1, &DeviceId, NULL, NULL, NULL);
+
+	if (Ret == CL_BUILD_PROGRAM_FAILURE)
+	{
+		UE_LOG(LogOpenCL, Warning, TEXT("RunKernelOnDevices:: Error:CL_BUILD_PROGRAM_FAILURE"));
+		ResultCallback(TEXT("Error: CL_BUILD_PROGRAM_FAILURE."));
+		Ret = clReleaseProgram(Program);
+		Ret = clReleaseCommandQueue(CommandQueue);
+		return;
+	}
+
+	/* Create OpenCL Kernel */
+	Kernel = clCreateKernel(Program, "hello", &Ret);
+
+	if (Ret == CL_INVALID_PROGRAM_EXECUTABLE)
+	{
+		UE_LOG(LogOpenCL, Warning, TEXT("RunKernelOnDevices:: Error:CL_INVALID_PROGRAM_EXECUTABLE"));
+		ResultCallback(TEXT("Error: CL_INVALID_PROGRAM_EXECUTABLE."));
+		Ret = clReleaseKernel(Kernel);
+		Ret = clReleaseProgram(Program);
+		Ret = clReleaseCommandQueue(CommandQueue);
+		return;
+	}
+
+	/* Set OpenCL Kernel Parameters */
+	Ret = clSetKernelArg(Kernel, 0, sizeof(cl_mem), (void *)&MemObj);
+
+	/* Execute OpenCL Kernel */
+	Ret = clEnqueueTask(CommandQueue, Kernel, 0, NULL, NULL);
+
+	/* Copy results from the memory buffer */
+	char ReturnString[MemSize];
+
+	Ret = clEnqueueReadBuffer(CommandQueue, MemObj, CL_TRUE, 0, MemSize * sizeof(char), ReturnString, 0, NULL, NULL);
+
+	/* Display Result */
+	ResultCallback(FString(ANSI_TO_TCHAR(ReturnString)));
+
+	Ret = clFlush(CommandQueue);
+	Ret = clFinish(CommandQueue);
+	Ret = clReleaseKernel(Kernel);
+	Ret = clReleaseProgram(Program);
+	Ret = clReleaseMemObject(MemObj);
+	Ret = clReleaseCommandQueue(CommandQueue);
+	Ret = clReleaseContext(Context);
 
 	/*for (auto& Device : DeviceGroup)
 	{
