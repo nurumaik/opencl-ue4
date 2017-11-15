@@ -3,8 +3,20 @@
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Components/ActorComponent.h"
 #include "OCLData.h"
+#include "DirectoryWatcherModule.h"
+#include "IDirectoryWatcher.h"
 #include "OpenCLComponent.generated.h"
 
+UENUM(BlueprintType)
+enum EKernelFileChangeAction
+{
+	FCA_Unknown,
+	FCA_Added,
+	FCA_Modified,
+	FCA_Removed
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOCLWatchSignature, const FString&, FileChanged, EKernelFileChangeAction, ChangeType);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOCLResultSignature, const FString& , Result);
 
 UCLASS(ClassGroup = "Computing", meta = (BlueprintSpawnableComponent))
@@ -16,9 +28,19 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "OpenCL Events")
 	FOCLResultSignature OnResult;
 
+	UPROPERTY(BlueprintAssignable, Category = "OpenCL Events")
+	FOCLWatchSignature OnKernelSourceChanged;
+
 	/** Devices specified here will be the ones that will be used when running RunOpenCLKernel*/
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Events")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
 	TArray<FOpenCLDeviceData> DeviceGroup;
+
+	/** Devices specified here will be the ones that will be used when running RunOpenCLKernel*/
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
+	bool bWatchKernelsFolderOnStartup;
+
+	UFUNCTION(BlueprintPure, Category = "OpenCL Functions")
+	bool IsWatchingFolders();
 
 	/** Did we enumerate at least one valid opencl device?*/
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
@@ -35,8 +57,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
 	void RunOpenCLKernel(const FString& Kernel, const FString& KernelName = TEXT("main"), const FString& InputArgs = TEXT(""));
 
+	/** Start watching kernel file for changes */
+	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
+	void WatchKernelFolder(const FString& ProjectRelativeFolder = TEXT("Kernels"));
+
+	/** Stop watching kernel file for changes */
+	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
+	void UnwatchKernelFolder(const FString& ProjectRelativeFolder = TEXT("Kernels"));
+
 
 protected:
+	IDirectoryWatcher::FDirectoryChanged Changed;
+	FDelegateHandle DelegateHandle;
+	TArray<FString> WatchedFolders;
+	FDateTime LastWatchEventCall;
 
 	virtual void InitializeComponent() override;
 	virtual void UninitializeComponent() override;

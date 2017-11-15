@@ -1,12 +1,19 @@
 #include "OpenCLComponent.h"
+#include "EngineMinimal.h"
 #include "IOpenCLPlugin.h"
 
 UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorComponent(init)
 {
 	bWantsInitializeComponent = true;
 	bAutoActivate = true;
+	bWatchKernelsFolderOnStartup = true;
 
 	DeviceGroup = EnumerateDevices();
+}
+
+bool UOpenCLComponent::IsWatchingFolders()
+{
+	return WatchedFolders.Num() > 0;
 }
 
 bool UOpenCLComponent::HasValidHardware()
@@ -46,13 +53,78 @@ void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& Ker
 	}
 }
 
+void UOpenCLComponent::WatchKernelFolder(const FString& ProjectRelativeFolder)
+{
+	UnwatchKernelFolder(ProjectRelativeFolder);
+	FString AbsolutePath = FPaths::ProjectContentDir() + ProjectRelativeFolder;
+
+	FDirectoryWatcherModule& DirectoryWatcherModule = FModuleManager::Get().LoadModuleChecked<FDirectoryWatcherModule>(TEXT("DirectoryWatcher"));
+	IDirectoryWatcher* DirectoryWatcher = DirectoryWatcherModule.Get();
+
+	Changed = IDirectoryWatcher::FDirectoryChanged::CreateLambda([&](const TArray<FFileChangeData>& FileChanges) {
+
+		FTimespan Difference = FDateTime::Now() - LastWatchEventCall;
+
+		//Rate limit file change callbacks
+		if (Difference.GetTotalSeconds() > 0.1f)
+		{
+			for (auto Change : FileChanges)
+			{
+				FPaths::NormalizeFilename(Change.Filename);
+				OnKernelSourceChanged.Broadcast(Change.Filename, (EKernelFileChangeAction)Change.Action);
+			}
+			LastWatchEventCall = FDateTime::Now();
+		}
+	});
+
+	if (IFileManager::Get().DirectoryExists(*AbsolutePath))
+	{
+		DirectoryWatcher->RegisterDirectoryChangedCallback_Handle(AbsolutePath, Changed, DelegateHandle, true);
+		WatchedFolders.Add(ProjectRelativeFolder);
+	}
+	else
+	{
+		UE_LOG(LogOpenCL, Log, TEXT("WatchKernelFolder:: %s folder doesn't exist."), *AbsolutePath);
+	}
+}
+
+void UOpenCLComponent::UnwatchKernelFolder(const FString& ProjectRelativeFolder)
+{
+	FString AbsolutePath = FPaths::ProjectContentDir() + ProjectRelativeFolder;
+
+	FDirectoryWatcherModule& DirectoryWatcherModule = FModuleManager::Get().LoadModuleChecked<FDirectoryWatcherModule>(TEXT("DirectoryWatcher"));
+	IDirectoryWatcher* DirectoryWatcher = DirectoryWatcherModule.Get();
+
+	if (IFileManager::Get().DirectoryExists(*AbsolutePath))
+	{
+		DirectoryWatcher->UnregisterDirectoryChangedCallback_Handle(AbsolutePath, DelegateHandle);
+		WatchedFolders.Remove(ProjectRelativeFolder);
+	}
+	else
+	{
+		UE_LOG(LogOpenCL, Log, TEXT("UnwatchKernelFolder:: %s folder doesn't exist."), *AbsolutePath);
+	}
+}
+
 void UOpenCLComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	DeviceGroup = EnumerateDevices();
+
+	LastWatchEventCall = FDateTime::Now();
+	UWorld* World = GEngine->GetWorldFromContextObject(this, EGetWorldErrorMode::LogAndReturnNull);
+	if (bWatchKernelsFolderOnStartup && World->IsGameWorld())
+	{
+		WatchKernelFolder();
+	}
+	
 }
 
 void UOpenCLComponent::UninitializeComponent()
-{
+{	
+	for (auto Folder : WatchedFolders)
+	{
+		UnwatchKernelFolder(Folder);
+	}
 	Super::UninitializeComponent();
 }
