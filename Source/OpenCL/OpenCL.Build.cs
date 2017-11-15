@@ -38,11 +38,11 @@ namespace UnrealBuildTool.Rules
             string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "Win64" : "Win32";
             string OpenCLLibrariesPath = Path.Combine(ThirdPartyPath, "OpenCL", "Lib");
             string NvidiaLibrariesPath = Path.Combine(OpenCLLibrariesPath, "NVIDIA", PlatformString);
-            string InelLibrariesPath = Path.Combine(OpenCLLibrariesPath, "Intel", PlatformString);
+            string IntelLibrariesPath = Path.Combine(OpenCLLibrariesPath, "Intel", PlatformString);
             if (Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.Win32)
             {
                 PublicAdditionalLibraries.Add(Path.Combine(NvidiaLibrariesPath, "OpenCL.lib"));
-                PublicAdditionalLibraries.Add(Path.Combine(InelLibrariesPath, "OpenCL.lib"));
+                PublicAdditionalLibraries.Add(Path.Combine(IntelLibrariesPath, "OpenCL.lib"));
             }
             else if (Target.Platform == UnrealTargetPlatform.Mac)
             {
