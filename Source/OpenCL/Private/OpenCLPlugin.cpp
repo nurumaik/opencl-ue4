@@ -13,7 +13,7 @@ class OpenCLPlugin : public IOpenCLPlugin
 	virtual void ShutdownModule() override;
 
 	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) override;
-	virtual void RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) override;
+	virtual void RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) override;
 
 private:
 	TArray<FOpenCLDeviceData> Devices;
@@ -128,15 +128,17 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 	bHasEnumeratedOnce = true;
 }
 
-void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& DeviceGroup)
+void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices)
 {
-	if (DeviceGroup.Num() == 0)
+	//For now we only run this on the top level device in the group
+
+	if (OutDevices.Num() == 0)
 	{
 		UE_LOG(LogOpenCL, Log, TEXT("RunKernelOnDevices:: No devices found in devicegroup."));
 		return;
 	}
-	//grab top level device for now
-	const FOpenCLDeviceData& Device = DeviceGroup[0];
+	//grab top level device for now, todo: run for entire group?
+	const FOpenCLDeviceData& Device = OutDevices[0];
 
 	cl_device_id DeviceId = (cl_device_id)Device.RawDeviceId;
 
@@ -187,7 +189,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	}
 
 	/* Create OpenCL Kernel */
-	Kernel = clCreateKernel(Program, "hello", &Ret);
+	Kernel = clCreateKernel(Program, TCHAR_TO_ANSI(*KernelName), &Ret);
 
 	if (Ret == CL_INVALID_PROGRAM_EXECUTABLE)
 	{
@@ -220,12 +222,6 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	Ret = clReleaseMemObject(MemObj);
 	Ret = clReleaseCommandQueue(CommandQueue);
 	Ret = clReleaseContext(Context);
-	//free(SourceStr);
-
-	/*for (auto& Device : DeviceGroup)
-	{
-
-	}*/
 }
 
 void OpenCLPlugin::FreeDeviceMemory()

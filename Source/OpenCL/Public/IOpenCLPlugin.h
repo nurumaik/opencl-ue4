@@ -37,7 +37,11 @@ public:
 	}
 
 	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) {};
-	virtual void RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) {};
+	virtual void RunKernelOnDevices(const FString& KernelString,
+									const FString& KernelName,
+									const FString& Args,
+									TFunction<void(const FString&)> ResultCallback,
+									const TArray<FOpenCLDeviceData>& OutDevices) {};
 
 };
 

@@ -35,11 +35,11 @@ FString UOpenCLComponent::ReadKernelFromFile(const FString& ProjectRelativePath)
 	return ResultString;
 }
 
-void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& InputArgs /*= TEXT("")*/)
+void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& KernelName /*= TEXT("main")*/, const FString& InputArgs /*= TEXT("")*/)
 {
 	if (IOpenCLPlugin::Get().IsAvailable())
 	{
-		IOpenCLPlugin::Get().RunKernelOnDevices(Kernel, InputArgs, [this](const FString& Result)
+		IOpenCLPlugin::Get().RunKernelOnDevices(Kernel, KernelName, InputArgs, [this](const FString& Result)
 		{
 			OnResult.Broadcast(Result);
 		}, DeviceGroup);

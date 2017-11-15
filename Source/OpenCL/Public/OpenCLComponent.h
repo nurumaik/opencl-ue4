@@ -33,7 +33,7 @@ public:
 
 	/** Run specified kernel on the current device group with passed in arguments */
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
-	void RunOpenCLKernel(const FString& Kernel, const FString& InputArgs = TEXT(""));
+	void RunOpenCLKernel(const FString& Kernel, const FString& KernelName = TEXT("main"), const FString& InputArgs = TEXT(""));
 
 
 protected:
