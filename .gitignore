@@ -7,6 +7,7 @@
 # Ignore crash reports
 /crashinfo--*
 
-!/OpenCL/Binaries
-/OpenCL/Binaries/**
+!/Binaries
+/Binaries/**
 
+/Intermediate
