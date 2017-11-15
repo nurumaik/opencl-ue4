@@ -17,7 +17,7 @@ enum EKernelFileChangeAction
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOCLWatchSignature, const FString&, FileChanged, EKernelFileChangeAction, ChangeType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOCLResultSignature, const FString& , Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOCLResultSignature, const FString& , Result, bool, Success);
 
 UCLASS(ClassGroup = "Computing", meta = (BlueprintSpawnableComponent))
 class OPENCL_API UOpenCLComponent : public UActorComponent

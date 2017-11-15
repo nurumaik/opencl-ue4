@@ -13,7 +13,7 @@ class OpenCLPlugin : public IOpenCLPlugin
 	virtual void ShutdownModule() override;
 
 	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) override;
-	virtual void RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) override;
+	virtual void RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&, bool)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) override;
 
 private:
 	TArray<FOpenCLDeviceData> Devices;
@@ -128,7 +128,7 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 	bHasEnumeratedOnce = true;
 }
 
-void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices)
+void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& KernelName, const FString& Args, TFunction<void(const FString&, bool)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices)
 {
 	//For now we only run this on the top level device in the group
 
@@ -154,6 +154,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	cl_command_queue CommandQueue = nullptr;
 	cl_mem MemObj = nullptr;
 	cl_program Program = nullptr;
+	cl_build_status BuildStatus;
 	cl_kernel Kernel = nullptr;
 	TArray<uint8> SourceCharArray;
 	const int32 MemSize = 128;
@@ -179,10 +180,28 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	/* Build Kernel Program */
 	Ret = clBuildProgram(Program, 1, &DeviceId, NULL, NULL, NULL);
 
-	if (Ret == CL_BUILD_PROGRAM_FAILURE)
+	clGetProgramBuildInfo(Program, DeviceId, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &BuildStatus, NULL);
+
+
+	if (BuildStatus != CL_SUCCESS)
 	{
-		UE_LOG(LogOpenCL, Warning, TEXT("RunKernelOnDevices:: Error:CL_BUILD_PROGRAM_FAILURE"));
-		ResultCallback(TEXT("Error: CL_BUILD_PROGRAM_FAILURE."));
+		char *BuildLog;
+		size_t RetValSize;
+		FString ErrorMessage = TEXT("RunKernelOnDevices::CL_BUILD_PROGRAM_FAILURE\n");
+
+		clGetProgramBuildInfo(Program, DeviceId, CL_PROGRAM_BUILD_LOG, 0, NULL, &RetValSize);
+
+		BuildLog = new char[RetValSize + 1];
+
+		clGetProgramBuildInfo(Program, DeviceId, CL_PROGRAM_BUILD_LOG, RetValSize, BuildLog, NULL);
+		BuildLog[RetValSize] = '\0';
+
+		ErrorMessage += FString(BuildLog);
+
+		UE_LOG(LogOpenCL, Warning, TEXT("%s"), *ErrorMessage);
+		ResultCallback(ErrorMessage, false);
+
+		delete[] BuildLog;
 		Ret = clReleaseProgram(Program);
 		Ret = clReleaseCommandQueue(CommandQueue);
 		return;
@@ -194,7 +213,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	if (Ret == CL_INVALID_PROGRAM_EXECUTABLE)
 	{
 		UE_LOG(LogOpenCL, Warning, TEXT("RunKernelOnDevices:: Error:CL_INVALID_PROGRAM_EXECUTABLE"));
-		ResultCallback(TEXT("Error: CL_INVALID_PROGRAM_EXECUTABLE."));
+		ResultCallback(TEXT("Error: CL_INVALID_PROGRAM_EXECUTABLE."), false);
 		Ret = clReleaseKernel(Kernel);
 		Ret = clReleaseProgram(Program);
 		Ret = clReleaseCommandQueue(CommandQueue);
@@ -213,7 +232,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	Ret = clEnqueueReadBuffer(CommandQueue, MemObj, CL_TRUE, 0, MemSize * sizeof(char), ReturnString, 0, NULL, NULL);
 
 	/* Display Result */
-	ResultCallback(FString(ANSI_TO_TCHAR(ReturnString)));
+	ResultCallback(FString(ANSI_TO_TCHAR(ReturnString)), true);
 
 	Ret = clFlush(CommandQueue);
 	Ret = clFinish(CommandQueue);

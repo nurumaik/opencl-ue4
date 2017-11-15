@@ -55,9 +55,9 @@ void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& Ker
 {
 	if (IOpenCLPlugin::Get().IsAvailable())
 	{
-		IOpenCLPlugin::Get().RunKernelOnDevices(Kernel, KernelName, InputArgs, [this](const FString& Result)
+		IOpenCLPlugin::Get().RunKernelOnDevices(Kernel, KernelName, InputArgs, [this](const FString& Result, bool Success)
 		{
-			OnResult.Broadcast(Result);
+			OnResult.Broadcast(Result, Success);
 		}, DeviceGroup);
 	}
 }

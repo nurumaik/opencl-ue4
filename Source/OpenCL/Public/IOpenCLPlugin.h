@@ -40,7 +40,7 @@ public:
 	virtual void RunKernelOnDevices(const FString& KernelString,
 									const FString& KernelName,
 									const FString& Args,
-									TFunction<void(const FString&)> ResultCallback,
+									TFunction<void(const FString&, bool)> ResultCallback,
 									const TArray<FOpenCLDeviceData>& OutDevices) {};
 
 };
