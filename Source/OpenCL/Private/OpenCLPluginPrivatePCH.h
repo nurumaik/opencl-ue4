@@ -1,4 +1,4 @@
 #include "ModuleManager.h"
 
-#include "OpenCL.h"
+#include "CL/opencl.h"
 #include "IOpenCLPlugin.h"
