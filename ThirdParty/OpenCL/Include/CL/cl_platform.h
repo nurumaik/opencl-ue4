@@ -1,5 +1,5 @@
 /**********************************************************************************
- * Copyright (c) 2008-2012 The Khronos Group Inc.
+ * Copyright (c) 2008-2015 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and/or associated documentation files (the
@@ -11,6 +11,11 @@
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Materials.
+ *
+ * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
+ * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
+ * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
+ *    https://www.khronos.org/registry/
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -45,6 +50,14 @@ extern "C" {
     #define CL_CALLBACK
 #endif
 
+/*
+ * Deprecation flags refer to the last version of the header in which the
+ * feature was not deprecated.
+ *
+ * E.g. VERSION_1_1_DEPRECATED means the feature is present in 1.1 without
+ * deprecation but is deprecated in versions later than 1.1.
+ */
+
 #ifdef __APPLE__
     #define CL_EXTENSION_WEAK_LINK       __attribute__((weak_import))
     #define CL_API_SUFFIX__VERSION_1_0                  AVAILABLE_MAC_OS_X_VERSION_10_6_AND_LATER
@@ -75,6 +88,10 @@ extern "C" {
     #define CL_EXT_SUFFIX__VERSION_1_1
     #define CL_API_SUFFIX__VERSION_1_2
     #define CL_EXT_SUFFIX__VERSION_1_2
+    #define CL_API_SUFFIX__VERSION_2_0
+    #define CL_EXT_SUFFIX__VERSION_2_0
+    #define CL_API_SUFFIX__VERSION_2_1
+    #define CL_EXT_SUFFIX__VERSION_2_1
     
     #ifdef __GNUC__
         #ifdef CL_USE_DEPRECATED_OPENCL_1_0_APIS
@@ -92,9 +109,25 @@ extern "C" {
             #define CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED __attribute__((deprecated))
             #define CL_EXT_PREFIX__VERSION_1_1_DEPRECATED    
         #endif
+
+        #ifdef CL_USE_DEPRECATED_OPENCL_1_2_APIS
+            #define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
+            #define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED
+        #else
+            #define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED __attribute__((deprecated))
+            #define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED
+         #endif
+
+        #ifdef CL_USE_DEPRECATED_OPENCL_2_0_APIS
+            #define CL_EXT_SUFFIX__VERSION_2_0_DEPRECATED
+            #define CL_EXT_PREFIX__VERSION_2_0_DEPRECATED
+        #else
+            #define CL_EXT_SUFFIX__VERSION_2_0_DEPRECATED __attribute__((deprecated))
+            #define CL_EXT_PREFIX__VERSION_2_0_DEPRECATED
+        #endif
     #elif _WIN32
         #ifdef CL_USE_DEPRECATED_OPENCL_1_0_APIS
-            #define CL_EXT_SUFFIX__VERSION_1_0_DEPRECATED    
+            #define CL_EXT_SUFFIX__VERSION_1_0_DEPRECATED
             #define CL_EXT_PREFIX__VERSION_1_0_DEPRECATED    
         #else
             #define CL_EXT_SUFFIX__VERSION_1_0_DEPRECATED 
@@ -108,12 +141,34 @@ extern "C" {
             #define CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED 
             #define CL_EXT_PREFIX__VERSION_1_1_DEPRECATED __declspec(deprecated)     
         #endif
+    
+        #ifdef CL_USE_DEPRECATED_OPENCL_1_2_APIS
+            #define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
+            #define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED
+        #else
+            #define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
+            #define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED __declspec(deprecated)
+        #endif
+
+        #ifdef CL_USE_DEPRECATED_OPENCL_2_0_APIS
+            #define CL_EXT_SUFFIX__VERSION_2_0_DEPRECATED
+            #define CL_EXT_PREFIX__VERSION_2_0_DEPRECATED
+        #else
+            #define CL_EXT_SUFFIX__VERSION_2_0_DEPRECATED 
+            #define CL_EXT_PREFIX__VERSION_2_0_DEPRECATED __declspec(deprecated)
+        #endif
     #else
         #define CL_EXT_SUFFIX__VERSION_1_0_DEPRECATED
         #define CL_EXT_PREFIX__VERSION_1_0_DEPRECATED
     
         #define CL_EXT_SUFFIX__VERSION_1_1_DEPRECATED
         #define CL_EXT_PREFIX__VERSION_1_1_DEPRECATED
+    
+        #define CL_EXT_SUFFIX__VERSION_1_2_DEPRECATED
+        #define CL_EXT_PREFIX__VERSION_1_2_DEPRECATED
+
+        #define CL_EXT_SUFFIX__VERSION_2_0_DEPRECATED
+        #define CL_EXT_PREFIX__VERSION_2_0_DEPRECATED
     #endif
 #endif
 
@@ -791,6 +846,81 @@ typedef union
     __cl_ushort16    v16;
 #endif
 }cl_ushort16;
+
+
+/* ---- cl_halfn ---- */
+typedef union
+{
+    cl_half  CL_ALIGNED(4) s[2];
+#if __CL_HAS_ANON_STRUCT__
+    __CL_ANON_STRUCT__ struct{ cl_half  x, y; };
+    __CL_ANON_STRUCT__ struct{ cl_half  s0, s1; };
+    __CL_ANON_STRUCT__ struct{ cl_half  lo, hi; };
+#endif
+#if defined( __CL_HALF2__) 
+    __cl_half2     v2;
+#endif
+}cl_half2;
+
+typedef union
+{
+    cl_half  CL_ALIGNED(8) s[4];
+#if __CL_HAS_ANON_STRUCT__
+    __CL_ANON_STRUCT__ struct{ cl_half  x, y, z, w; };
+    __CL_ANON_STRUCT__ struct{ cl_half  s0, s1, s2, s3; };
+    __CL_ANON_STRUCT__ struct{ cl_half2 lo, hi; };
+#endif
+#if defined( __CL_HALF2__) 
+    __cl_half2     v2[2];
+#endif
+#if defined( __CL_HALF4__) 
+    __cl_half4     v4;
+#endif
+}cl_half4;
+
+/* cl_half3 is identical in size, alignment and behavior to cl_half4. See section 6.1.5. */
+typedef  cl_half4  cl_half3;
+
+typedef union
+{
+    cl_half   CL_ALIGNED(16) s[8];
+#if __CL_HAS_ANON_STRUCT__
+    __CL_ANON_STRUCT__ struct{ cl_half  x, y, z, w; };
+    __CL_ANON_STRUCT__ struct{ cl_half  s0, s1, s2, s3, s4, s5, s6, s7; };
+    __CL_ANON_STRUCT__ struct{ cl_half4 lo, hi; };
+#endif
+#if defined( __CL_HALF2__) 
+    __cl_half2     v2[4];
+#endif
+#if defined( __CL_HALF4__) 
+    __cl_half4     v4[2];
+#endif
+#if defined( __CL_HALF8__ )
+    __cl_half8     v8;
+#endif
+}cl_half8;
+
+typedef union
+{
+    cl_half  CL_ALIGNED(32) s[16];
+#if __CL_HAS_ANON_STRUCT__
+    __CL_ANON_STRUCT__ struct{ cl_half  x, y, z, w, __spacer4, __spacer5, __spacer6, __spacer7, __spacer8, __spacer9, sa, sb, sc, sd, se, sf; };
+    __CL_ANON_STRUCT__ struct{ cl_half  s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, sA, sB, sC, sD, sE, sF; };
+    __CL_ANON_STRUCT__ struct{ cl_half8 lo, hi; };
+#endif
+#if defined( __CL_HALF2__) 
+    __cl_half2     v2[8];
+#endif
+#if defined( __CL_HALF4__) 
+    __cl_half4     v4[4];
+#endif
+#if defined( __CL_HALF8__ )
+    __cl_half8     v8[2];
+#endif
+#if defined( __CL_HALF16__ )
+    __cl_half16    v16;
+#endif
+}cl_half16;
 
 /* ---- cl_intn ---- */
 typedef union

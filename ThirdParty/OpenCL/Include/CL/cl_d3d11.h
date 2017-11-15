@@ -1,5 +1,5 @@
 /**********************************************************************************
- * Copyright (c) 2008-2012 The Khronos Group Inc.
+ * Copyright (c) 2008-2015 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and/or associated documentation files (the
@@ -11,6 +11,11 @@
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Materials.
+ *
+ * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
+ * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
+ * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
+ *    https://www.khronos.org/registry/
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -71,6 +76,11 @@ typedef cl_uint cl_d3d11_device_set_khr;
 #define CL_COMMAND_ACQUIRE_D3D11_OBJECTS_KHR         0x4020
 #define CL_COMMAND_RELEASE_D3D11_OBJECTS_KHR         0x4021
 
+// object types
+
+#define CL_D3D11_OBJECT_BUFFER                0x3000
+#define CL_D3D11_OBJECT_TEXTURE2D             0x3001
+#define CL_D3D11_OBJECT_TEXTURE3D             0x3003
 /******************************************************************************/
 
 typedef CL_API_ENTRY cl_int (CL_API_CALL *clGetDeviceIDsFromD3D11KHR_fn)(

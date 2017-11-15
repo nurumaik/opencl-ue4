@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008-2013 The Khronos Group Inc.
+ * Copyright (c) 2008-2015 The Khronos Group Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and/or associated documentation files (the
@@ -11,6 +11,11 @@
  *
  * The above copyright notice and this permission notice shall be included
  * in all copies or substantial portions of the Materials.
+ *
+ * MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS
+ * KHRONOS STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS
+ * SPECIFICATIONS AND HEADER INFORMATION ARE LOCATED AT
+ *    https://www.khronos.org/registry/
  *
  * THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -134,15 +139,15 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clIcdGetPlatformIDsKHR_fn)(
  * cl_khr_initalize_memory extension *
  *************************************/
     
-#define CL_CONTEXT_MEMORY_INITIALIZE_KHR            0x200E
+#define CL_CONTEXT_MEMORY_INITIALIZE_KHR            0x2030
     
     
 /**************************************
  * cl_khr_terminate_context extension *
  **************************************/
     
-#define CL_DEVICE_TERMINATE_CAPABILITY_KHR          0x200F
-#define CL_CONTEXT_TERMINATE_KHR                    0x2010
+#define CL_DEVICE_TERMINATE_CAPABILITY_KHR          0x2031
+#define CL_CONTEXT_TERMINATE_KHR                    0x2032
 
 #define cl_khr_terminate_context 1
 extern CL_API_ENTRY cl_int CL_API_CALL clTerminateContextKHR(cl_context /* context */) CL_EXT_SUFFIX__VERSION_1_2;
@@ -172,10 +177,6 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clTerminateContextKHR_fn)(cl_context /
 #define CL_DEVICE_GPU_OVERLAP_NV                    0x4004
 #define CL_DEVICE_KERNEL_EXEC_TIMEOUT_NV            0x4005
 #define CL_DEVICE_INTEGRATED_MEMORY_NV              0x4006
-#define CL_DEVICE_ATTRIBUTE_ASYNC_ENGINE_COUNT_NV   0x4007
-#define CL_DEVICE_PCI_BUS_ID_NV                     0x4008
-#define CL_DEVICE_PCI_SLOT_ID_NV                    0x4009
-
 
 /*********************************
 * cl_amd_device_attribute_query *
@@ -187,6 +188,216 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clTerminateContextKHR_fn)(cl_context /
 *********************************/
 #define CL_PRINTF_CALLBACK_ARM                      0x40B0
 #define CL_PRINTF_BUFFERSIZE_ARM                    0x40B1
+
+#ifdef _WIN32
+#if defined CL_DX9_MEDIA_SHARING_INTEL_EXT
+
+#include <d3d9.h>
+#include <dxvahd.h>
+#include <wtypes.h>
+#include <d3d9types.h>
+ 
+/******************************************************************************/    
+/* cl_intel_dx9_media_sharing extension                                       */
+#define cl_intel_dx9_media_sharing 1
+
+typedef cl_uint cl_dx9_device_source_intel;
+typedef cl_uint cl_dx9_device_set_intel;
+
+/******************************************************************************/
+
+// Error Codes
+#define CL_INVALID_DX9_DEVICE_INTEL                   -1010
+#define CL_INVALID_DX9_RESOURCE_INTEL                 -1011
+#define CL_DX9_RESOURCE_ALREADY_ACQUIRED_INTEL        -1012
+#define CL_DX9_RESOURCE_NOT_ACQUIRED_INTEL            -1013
+
+// cl_dx9_device_source_intel
+#define CL_D3D9_DEVICE_INTEL                          0x4022
+#define CL_D3D9EX_DEVICE_INTEL                        0x4070
+#define CL_DXVA_DEVICE_INTEL                          0x4071
+
+// cl_dx9_device_set_intel
+#define CL_PREFERRED_DEVICES_FOR_DX9_INTEL            0x4024
+#define CL_ALL_DEVICES_FOR_DX9_INTEL                  0x4025
+
+// cl_context_info
+#define CL_CONTEXT_D3D9_DEVICE_INTEL                  0x4026
+#define CL_CONTEXT_D3D9EX_DEVICE_INTEL                0x4072
+#define CL_CONTEXT_DXVA_DEVICE_INTEL                  0x4073
+
+// cl_mem_info
+#define CL_MEM_DX9_RESOURCE_INTEL                     0x4027
+#define CL_MEM_DX9_SHARED_HANDLE_INTEL                0x4074
+
+// cl_image_info
+#define CL_IMAGE_DX9_PLANE_INTEL                      0x4075
+
+// cl_command_type
+#define CL_COMMAND_ACQUIRE_DX9_OBJECTS_INTEL          0x402A
+#define CL_COMMAND_RELEASE_DX9_OBJECTS_INTEL          0x402B
+
+//packed YUV channel order
+#define CL_YUYV_INTEL                                 0x4076
+#define CL_UYVY_INTEL                                 0x4077
+#define CL_YVYU_INTEL                                 0x4078
+#define CL_VYUY_INTEL                                 0x4079
+
+/******************************************************************************/
+
+typedef CL_API_ENTRY cl_int (CL_API_CALL* clGetDeviceIDsFromDX9INTEL_fn)(
+    cl_platform_id              /*platform*/,
+    cl_dx9_device_source_intel  /*dx9_device_source*/,
+    void*                       /*dx9_object*/,
+    cl_dx9_device_set_intel     /*dx9_device_set*/,
+    cl_uint                     /*num_entries*/, 
+    cl_device_id*               /*devices*/, 
+    cl_uint*                    /*num_devices*/);
+    
+typedef CL_API_ENTRY cl_mem (CL_API_CALL *clCreateFromDX9MediaSurfaceINTEL_fn)(
+    cl_context                  /*context*/,
+    cl_mem_flags                /*flags*/,
+    IDirect3DSurface9 *         /*resource*/,
+    HANDLE                      /*sharedHandle*/,
+    UINT                        /*plane*/,
+    cl_int *                    /*errcode_ret*/);
+    
+typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueAcquireDX9ObjectsINTEL_fn)(
+    cl_command_queue            /*command_queue*/,
+    cl_uint                     /*num_objects*/,
+    const cl_mem *              /*mem_objects*/,
+    cl_uint                     /*num_events_in_wait_list*/,
+    const cl_event *            /*event_wait_list*/,
+    cl_event *                  /*event*/);
+    
+typedef CL_API_ENTRY cl_int (CL_API_CALL *clEnqueueReleaseDX9ObjectsINTEL_fn)(
+    cl_command_queue            /*command_queue*/,
+    cl_uint                     /*num_objects*/,
+    cl_mem *                    /*mem_objects*/,
+    cl_uint                     /*num_events_in_wait_list*/,
+    const cl_event *            /*event_wait_list*/,
+    cl_event *                  /*event*/);
+
+#endif // CL_DX9_MEDIA_SHARING_INTEL_EXT
+#endif
+
+/*********************************
+* cl_intel_accelerator extension *
+*********************************/
+#define cl_intel_accelerator 1
+#define cl_intel_motion_estimation 1
+
+typedef struct _cl_accelerator_intel*     cl_accelerator_intel;
+typedef cl_uint                           cl_accelerator_type_intel;
+typedef cl_uint                           cl_accelerator_info_intel;
+
+typedef struct _cl_motion_estimation_desc_intel {
+    cl_uint mb_block_type;
+    cl_uint subpixel_mode;
+    cl_uint sad_adjust_mode;
+    cl_uint search_path_type;
+} cl_motion_estimation_desc_intel;
+
+/* Error Codes */
+#define CL_INVALID_ACCELERATOR_INTEL            -1094
+#define CL_INVALID_ACCELERATOR_TYPE_INTEL       -1095
+#define CL_INVALID_ACCELERATOR_DESCRIPTOR_INTEL -1096
+#define CL_ACCELERATOR_TYPE_NOT_SUPPORTED_INTEL -1097
+
+/* Deprecated Error Codes */
+#define CL_INVALID_ACCELERATOR_INTEL_DEPRECATED            -6000
+#define CL_INVALID_ACCELERATOR_TYPE_INTEL_DEPRECATED       -6001
+#define CL_INVALID_ACCELERATOR_DESCRIPTOR_INTEL_DEPRECATED -6002
+#define CL_ACCELERATOR_TYPE_NOT_SUPPORTED_INTEL_DEPRECATED -6003
+
+/* cl_accelerator_type_intel */
+#define CL_ACCELERATOR_TYPE_MOTION_ESTIMATION_INTEL     0x0
+
+/* cl_accelerator_info_intel */
+#define CL_ACCELERATOR_DESCRIPTOR_INTEL                 0x4090
+#define CL_ACCELERATOR_REFERENCE_COUNT_INTEL            0x4091
+#define CL_ACCELERATOR_CONTEXT_INTEL                    0x4092
+#define CL_ACCELERATOR_TYPE_INTEL                       0x4093
+
+/*cl_motion_detect_desc_intel flags */
+#define CL_ME_MB_TYPE_16x16_INTEL                       0x0
+#define CL_ME_MB_TYPE_8x8_INTEL                         0x1
+#define CL_ME_MB_TYPE_4x4_INTEL                         0x2
+
+#define CL_ME_SUBPIXEL_MODE_INTEGER_INTEL               0x0
+#define CL_ME_SUBPIXEL_MODE_HPEL_INTEL                  0x1
+#define CL_ME_SUBPIXEL_MODE_QPEL_INTEL                  0x2
+
+#define CL_ME_SAD_ADJUST_MODE_NONE_INTEL                0x0
+#define CL_ME_SAD_ADJUST_MODE_HAAR_INTEL                0x1
+
+#define CL_ME_SEARCH_PATH_RADIUS_2_2_INTEL              0x0
+#define CL_ME_SEARCH_PATH_RADIUS_4_4_INTEL              0x1
+#define CL_ME_SEARCH_PATH_RADIUS_16_12_INTEL            0x5
+
+extern CL_API_ENTRY cl_accelerator_intel CL_API_CALL
+clCreateAcceleratorINTEL(
+    cl_context                  /* context */,
+    cl_accelerator_type_intel   /* accelerator_type */,
+    size_t                      /* descriptor_size */,
+    const void*                 /* descriptor */,
+    cl_int*                     /* errcode_ret */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+typedef CL_API_ENTRY cl_accelerator_intel
+    (CL_API_CALL *clCreateAcceleratorINTEL_fn)(
+    cl_context                  /* context */,
+    cl_accelerator_type_intel   /* accelerator_type */,
+    size_t                      /* descriptor_size */,
+    const void*                 /* descriptor */,
+    cl_int*                     /* errcode_ret */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clGetAcceleratorInfoINTEL
+(
+    cl_accelerator_intel        /* accelerator */,
+    cl_accelerator_info_intel   /* param_name */,
+    size_t                      /* param_value_size */,
+    void*                       /* param_value */,
+    size_t*                     /* param_value_size_ret */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+typedef CL_API_ENTRY cl_int
+    (CL_API_CALL *clGetAcceleratorInfoINTEL_fn)(
+    cl_accelerator_intel        /* accelerator */,
+    cl_accelerator_info_intel   /* param_name */,
+    size_t                      /* param_value_size */,
+    void*                       /* param_value */,
+    size_t*                     /* param_value_size_ret */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clSetAcceleratorInfoINTEL
+(
+    cl_accelerator_intel        /* accelerator */,
+    cl_accelerator_info_intel   /* param_name */,
+    size_t                      /* param_value_size */,
+    void*                       /* param_value */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+typedef CL_API_ENTRY cl_int
+    (CL_API_CALL *clSetAcceleratorInfoINTEL_fn)(
+    cl_accelerator_intel        /* accelerator */,
+    cl_accelerator_info_intel   /* param_name */,
+    size_t                      /* param_value_size */,
+    void*                       /* param_value */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clRetainAcceleratorINTEL(
+    cl_accelerator_intel        /* accelerator */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+typedef CL_API_ENTRY cl_int
+    (CL_API_CALL *clRetainAcceleratorINTEL_fn)(
+    cl_accelerator_intel        /* accelerator */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clReleaseAcceleratorINTEL(
+    cl_accelerator_intel        /* accelerator */ ) CL_EXT_SUFFIX__VERSION_1_2;
+
+typedef CL_API_ENTRY cl_int
+    (CL_API_CALL *clReleaseAcceleratorINTEL_fn)(
+    cl_accelerator_intel        /* accelerator */ ) CL_EXT_SUFFIX__VERSION_1_2;
 
 #ifdef CL_VERSION_1_1
    /***********************************
@@ -225,6 +436,7 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clTerminateContextKHR_fn)(cl_context /
     #define CL_DEVICE_PARTITION_EQUALLY_EXT             0x4050
     #define CL_DEVICE_PARTITION_BY_COUNTS_EXT           0x4051
     #define CL_DEVICE_PARTITION_BY_NAMES_EXT            0x4052
+    #define CL_DEVICE_PARTITION_BY_NAMES_INTEL          0x4052
     #define CL_DEVICE_PARTITION_BY_AFFINITY_DOMAIN_EXT  0x4053
     
     /* clDeviceGetInfo selectors */
@@ -251,6 +463,10 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clTerminateContextKHR_fn)(cl_context /
     #define CL_PROPERTIES_LIST_END_EXT                  ((cl_device_partition_property_ext) 0)
     #define CL_PARTITION_BY_COUNTS_LIST_END_EXT         ((cl_device_partition_property_ext) 0)
     #define CL_PARTITION_BY_NAMES_LIST_END_EXT          ((cl_device_partition_property_ext) 0 - 1)
+    #define CL_PARTITION_BY_NAMES_LIST_END_INTEL        ((cl_device_partition_property_ext) 0 - 1)
+
+    #define CL_QUEUE_THREAD_LOCAL_EXEC_ENABLE_INTEL      (1 << 31)
+
 
 /*********************************
 * cl_qcom_ext_host_ptr extension
@@ -285,7 +501,7 @@ typedef struct _cl_mem_ext_host_ptr
     /* Legal values will be defined in layered extensions. */
     cl_uint  allocation_type;
             
-	/* Host cache policy for this external memory allocation. */
+    /* Host cache policy for this external memory allocation. */
     cl_uint  host_cache_policy;
 
 } cl_mem_ext_host_ptr;
@@ -311,6 +527,220 @@ typedef struct _cl_mem_ion_host_ptr
 } cl_mem_ion_host_ptr;
 
 #endif /* CL_VERSION_1_1 */
+
+
+#ifdef CL_VERSION_2_0
+/*********************************
+* cl_khr_sub_groups extension
+*********************************/
+#define cl_khr_sub_groups 1
+
+//typedef cl_uint  cl_kernel_sub_group_info;
+
+/* cl_khr_sub_group_info */
+#define CL_KERNEL_MAX_SUB_GROUP_SIZE_FOR_NDRANGE_KHR	0x2033
+#define CL_KERNEL_SUB_GROUP_COUNT_FOR_NDRANGE_KHR		0x2034
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clGetKernelSubGroupInfoKHR(cl_kernel /* in_kernel */,
+						   cl_device_id /*in_device*/,
+						   cl_kernel_sub_group_info /* param_name */,
+						   size_t /*input_value_size*/,
+						   const void * /*input_value*/,
+						   size_t /*param_value_size*/,
+						   void* /*param_value*/,
+						   size_t* /*param_value_size_ret*/ ) CL_EXT_SUFFIX__VERSION_2_0;
+						   
+typedef CL_API_ENTRY cl_int
+     ( CL_API_CALL * clGetKernelSubGroupInfoKHR_fn)(cl_kernel /* in_kernel */,
+						      cl_device_id /*in_device*/,
+						      cl_kernel_sub_group_info /* param_name */,
+						      size_t /*input_value_size*/,
+						      const void * /*input_value*/,
+						      size_t /*param_value_size*/,
+						      void* /*param_value*/,
+						      size_t* /*param_value_size_ret*/ ) CL_EXT_SUFFIX__VERSION_2_0;
+#endif /* CL_VERSION_2_0 */
+
+#ifdef CL_VERSION_2_1
+/*********************************
+* cl_khr_priority_hints extension
+*********************************/
+#define cl_khr_priority_hints 1
+
+typedef cl_uint  cl_queue_priority_khr;
+
+/* cl_command_queue_properties */
+#define CL_QUEUE_PRIORITY_KHR 0x1096
+
+/* cl_queue_priority_khr */
+#define CL_QUEUE_PRIORITY_HIGH_KHR (1<<0)
+#define CL_QUEUE_PRIORITY_MED_KHR (1<<1)
+#define CL_QUEUE_PRIORITY_LOW_KHR (1<<2)
+
+#endif /* CL_VERSION_2_1 */
+
+#ifdef CL_VERSION_2_1
+/*********************************
+* cl_khr_throttle_hints extension
+*********************************/
+#define cl_khr_throttle_hints 1
+
+typedef cl_uint  cl_queue_throttle_khr;
+
+/* cl_command_queue_properties */
+#define CL_QUEUE_THROTTLE_KHR 0x1097
+
+/* cl_queue_throttle_khr */
+#define CL_QUEUE_THROTTLE_HIGH_KHR (1<<0)
+#define CL_QUEUE_THROTTLE_MED_KHR (1<<1)
+#define CL_QUEUE_THROTTLE_LOW_KHR (1<<2)
+
+#endif /* CL_VERSION_2_1 */
+
+/* Altera extensions. */
+
+
+/*********************************
+* cl_altera_mem_banks
+*********************************/
+
+/* cl_mem_flags - bitfield */
+#define CL_MEM_BANK_AUTO_ALTERA           (0<<16)
+#define CL_MEM_BANK_1_ALTERA              (1<<16)
+#define CL_MEM_BANK_2_ALTERA              (2<<16)
+#define CL_MEM_BANK_3_ALTERA              (3<<16)
+#define CL_MEM_BANK_4_ALTERA              (4<<16)
+#define CL_MEM_BANK_5_ALTERA              (5<<16)
+#define CL_MEM_BANK_6_ALTERA              (6<<16)
+#define CL_MEM_BANK_7_ALTERA              (7<<16)
+
+
+#define CL_MEM_HETEROGENEOUS_ALTERA       (1<<19)
+
+
+
+/*********************************
+* clGetDeviceInfo extension
+*********************************/
+#define cl_altera_device_temperature
+/* Enum query for clGetDeviceInfo to get the die temperature in Celsius as a cl_int.
+ * If the device does not support the query then the result will be 0 */
+#define CL_DEVICE_CORE_TEMPERATURE_ALTERA        0x40F3
+
+
+
+/*********************************
+* CL API object tracking.
+*********************************/
+#define cl_altera_live_object_tracking
+
+/* Call this to begin tracking CL API objects.  
+ * Ideally, do this immediately after getting the platform ID.
+ * This takes extra space and time.
+ */
+extern CL_API_ENTRY void CL_API_CALL
+clTrackLiveObjectsIntelFPGA(cl_platform_id platform);
+
+/* Call this to be informed of all the live CL API objects, with their
+ * reference counts.
+ * The type name argument to the callback will be the string form of the type name
+ * e.g. "cl_event" for a cl_event.
+ */
+extern CL_API_ENTRY void CL_API_CALL
+clReportLiveObjectsIntelFPGA(
+      cl_platform_id platform,
+      void (CL_CALLBACK * /*report_fn*/)(
+         void* /* user_data */,
+         void* /* obj_ptr */,
+         const char* /* type_name */, 
+         cl_uint /* refcount */ ),
+      void* /* user_data*/ );
+
+/* Call this to query the FPGA and collect dynamic profiling data
+ * for a single kernel.
+ *
+ * The event passed to this call must be the event used
+ * in the kernel clEnqueueNDRangeKernel call. If the kernel
+ * completes execution before this function is invoked, 
+ * this function will return an event error code.
+ *
+ * NOTE: 
+ * Invoking this function while the kernel is running will
+ * disable the profile counters for a given interval.
+ * For example, on a PCIe-based system this was measured
+ * to be approximately 100us.
+ */
+extern CL_API_ENTRY cl_int CL_API_CALL
+clGetProfileInfoIntelFPGA(
+      cl_event /* kernel event */
+      );
+
+/*********************************
+* Altera offline compiler modes, offline device emulation.
+*********************************/
+#define cl_altera_compiler_mode
+
+#define CL_CONTEXT_COMPILER_MODE_ALTERA 0x40F0
+
+#define CL_CONTEXT_COMPILER_MODE_OFFLINE_ALTERA 0
+#define CL_CONTEXT_COMPILER_MODE_OFFLINE_CREATE_EXE_LIBRARY_ALTERA 1
+#define CL_CONTEXT_COMPILER_MODE_OFFLINE_USE_EXE_LIBRARY_ALTERA 2
+#define CL_CONTEXT_COMPILER_MODE_PRELOADED_BINARY_ONLY_ALTERA 3
+
+/* This property is used to specify the root directory of
+ * the executable program library for compiler modes 
+ * CL_CONTEXT_COMPILER_MODE_OFFLINE_CREATE_EXE_LIBRARY and
+ * CL_CONTEXT_COMPILER_MODE_OFFLINE_USE_EXE_LIBRARY.
+ * The value should be a pointer to a C-style character string naming
+ * the directory.  It can be relative, but will be resolved to an absolute
+ * directory at context creation time.
+ */
+#define CL_CONTEXT_PROGRAM_EXE_LIBRARY_ROOT_ALTERA 0x40F1
+
+/* This property is used to emulate, as much as possible,
+ * having a device that is actually not attached.
+ * Kernels may be enqueued but their code will not be run, 
+ * so data coming back from the device may be invalid.
+ * The value should be a pointer to a C-style character string with the
+ * short name for the device.
+ */
+#define CL_CONTEXT_OFFLINE_DEVICE_ALTERA 0x40F2
+
+/* FCD Support for Board Specific Functions */
+
+extern CL_API_ENTRY void* CL_API_CALL 
+clGetBoardExtensionFunctionAddressIntelFPGA(const char * /* func_name */,
+                                         cl_device_id    /* device */);
+
+extern CL_API_ENTRY cl_program CL_API_CALL
+clCreateProgramWithBinaryAndProgramDeviceIntelFPGA(cl_context                     /* context */,
+                          cl_uint                        /* num_devices */,
+                          const cl_device_id *           /* device_list */,
+                          const size_t *                 /* lengths */,
+                          const unsigned char **         /* binaries */,
+                          cl_int *                       /* binary_status */,
+                          cl_int *                       /* errcode_ret */) CL_API_SUFFIX__VERSION_1_0;
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clSetCommandQueueProperty(cl_command_queue              /* command_queue */,
+                          cl_command_queue_properties   /* properties */, 
+                          cl_bool                        /* enable */,
+                          cl_command_queue_properties * /* old_properties */) CL_EXT_SUFFIX__VERSION_1_0_DEPRECATED;
+
+/* Our own extra APIs */
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clReconfigurePLLIntelFPGA(
+         cl_device_id device,
+         const char *pll_settings_str);
+
+
+extern CL_API_ENTRY cl_int CL_API_CALL
+clResetKernelsIntelFPGA(
+         cl_context context,
+         cl_uint num_devices,
+         const cl_device_id *device_list);
 
 #ifdef __cplusplus
 }
