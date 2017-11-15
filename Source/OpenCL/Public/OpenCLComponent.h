@@ -35,9 +35,17 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
 	TArray<FOpenCLDeviceData> DeviceGroup;
 
-	/** Devices specified here will be the ones that will be used when running RunOpenCLKernel*/
+	/**Should we watch Content/Kernels on startup?*/
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
 	bool bWatchKernelsFolderOnStartup;
+
+	/** Amount of additional delay before trying to read the watched kernel file*/
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
+	float WatchedDiskReadDelay;
+
+	/** How long we should lock out notifications after a change*/
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "OpenCL Properties")
+	float WatchedNotificationLockout;
 
 	UFUNCTION(BlueprintPure, Category = "OpenCL Functions")
 	bool IsWatchingFolders();
@@ -51,8 +59,9 @@ public:
 	TArray<FOpenCLDeviceData> EnumerateDevices();
 
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
-	FString ReadKernelFromFile(const FString& FilePath, bool bIsContentRelative = true);
+	bool ReadKernelFromFile(const FString& FilePath, FString& OutKernelSource, bool bIsContentRelative = true);
 
+	
 	/** Run specified kernel on the current device group with passed in arguments */
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
 	void RunOpenCLKernel(const FString& Kernel, const FString& KernelName = TEXT("main"), const FString& InputArgs = TEXT(""));

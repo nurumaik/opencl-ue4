@@ -8,6 +8,8 @@ UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorCompo
 	bWantsInitializeComponent = true;
 	bAutoActivate = true;
 	bWatchKernelsFolderOnStartup = true;
+	WatchedDiskReadDelay = 0.05f;
+	WatchedNotificationLockout = 0.5f;
 
 	DeviceGroup = EnumerateDevices();
 }
@@ -34,7 +36,7 @@ TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
 	return Devices;
 }
 
-FString UOpenCLComponent::ReadKernelFromFile(const FString& FilePath, bool bIsContentRelative /*= true*/)
+bool UOpenCLComponent::ReadKernelFromFile(const FString& FilePath, FString& OutKernelSource, bool bIsContentRelative /*= true*/)
 {
 	FString AbsolutePath;
 	if (bIsContentRelative)
@@ -46,9 +48,7 @@ FString UOpenCLComponent::ReadKernelFromFile(const FString& FilePath, bool bIsCo
 		AbsolutePath = FilePath;
 	}
 
-	FString ResultString;
-	FFileHelper::LoadFileToString(ResultString, *AbsolutePath);
-	return ResultString;
+	return FFileHelper::LoadFileToString(OutKernelSource, *AbsolutePath);
 }
 
 void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& KernelName /*= TEXT("main")*/, const FString& InputArgs /*= TEXT("")*/)
@@ -75,16 +75,20 @@ void UOpenCLComponent::WatchKernelFolder(const FString& ProjectRelativeFolder)
 		FTimespan Difference = FDateTime::Now() - LastWatchEventCall;
 
 		//Rate limit file change callbacks
-		if (Difference.GetTotalSeconds() > 0.5f)
+		if (Difference.GetTotalSeconds() > WatchedNotificationLockout)
 		{
-			FFunctionGraphTask::CreateAndDispatchWhenReady([this, FileChanges]() {
+			FTimerHandle UniqueHandle;
+			FTimerDelegate TimerCallback;
+			TimerCallback.BindLambda([this, FileChanges]
+			{
 				for (auto Change : FileChanges)
 				{
 					FPaths::NormalizeFilename(Change.Filename);
 					OnKernelSourceChanged.Broadcast(Change.Filename, (EKernelFileChangeAction)Change.Action);
 				}
-				LastWatchEventCall = FDateTime::Now();
-			}, TStatId(), nullptr, ENamedThreads::GameThread);
+			});
+			GetWorld()->GetTimerManager().SetTimer(UniqueHandle, TimerCallback, WatchedDiskReadDelay, false);
+			LastWatchEventCall = FDateTime::Now();
 		}
 	});
 
