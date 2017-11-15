@@ -28,7 +28,13 @@ TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
 
 void UOpenCLComponent::RunOpenCLKernel(const FString& Kernel, const FString& InputArgs /*= TEXT("")*/)
 {
-
+	if (IOpenCLPlugin::Get().IsAvailable())
+	{
+		IOpenCLPlugin::Get().RunKernelOnDevices(Kernel, InputArgs, [this](const FString& Result)
+		{
+			OnResult.Broadcast(Result);
+		}, DeviceGroup);
+	}
 }
 
 void UOpenCLComponent::InitializeComponent()

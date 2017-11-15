@@ -11,11 +11,15 @@ class OpenCLPlugin : public IOpenCLPlugin
 	virtual void ShutdownModule() override;
 
 	virtual void EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh = false) override;
-	virtual void RunKernel(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback) override;
+	virtual void RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& OutDevices) override;
 
 private:
 	TArray<FOpenCLDeviceData> Devices;
+
+	TArray<cl_device_id*> DeviceIdsMemoryList;
 	bool bHasEnumeratedOnce;
+
+	void FreeDeviceMemory();
 };
 
 IMPLEMENT_MODULE( OpenCLPlugin, OpenCL )
@@ -35,7 +39,10 @@ void OpenCLPlugin::StartupModule()
 	}
 }
 
-void OpenCLPlugin::ShutdownModule() {}
+void OpenCLPlugin::ShutdownModule() 
+{
+	FreeDeviceMemory();
+}
 
 
 void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool bForceRefresh /*= false*/)
@@ -45,6 +52,8 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 		OutDevices = Devices;
 		return;
 	}
+
+	FreeDeviceMemory();
 
 	cl_uint i, j;
 	char* Value;
@@ -73,10 +82,14 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 		Devices = (cl_device_id*)malloc(sizeof(cl_device_id) * NumDevices);
 		clGetDeviceIDs(Platforms[i], CL_DEVICE_TYPE_ALL, NumDevices, Devices, NULL);
 
+		DeviceIdsMemoryList.Add(Devices);
+
 		//For each device
 		for (j = 0; j < NumDevices; j++) {
 			FOpenCLDeviceData Device;
 			Device.Platform = EnumeratedPlatform;
+			Device.DeviceId = FString::Printf(TEXT("%d"), ::PointerHash(Devices[j]));
+			Device.RawDeviceId = Devices[j];
 
 			clGetDeviceInfo(Devices[j], CL_DEVICE_NAME, 0, NULL, &ValueSize);
 			Value = (char*)malloc(ValueSize);
@@ -102,23 +115,35 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 			Device.OpenCLVersion = ANSI_TO_TCHAR(Value);
 			free(Value);
 
-			clGetDeviceInfo(Devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
-				sizeof(MaxComputeUnits), &MaxComputeUnits, NULL);
+			clGetDeviceInfo(Devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(MaxComputeUnits), &MaxComputeUnits, NULL);
 			Device.ParallelComputeUnits = MaxComputeUnits;
 			OutDevices.Add(Device);
 		}
-		free(Devices);
-
+		//free(Devices);
 	}
 	free(Platforms);
 
-	if (!bHasEnumeratedOnce)
-	{
-		bHasEnumeratedOnce;
-	}
+	bHasEnumeratedOnce = true;
 }
 
-void OpenCLPlugin::RunKernel(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback)
+void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString& Args, TFunction<void(const FString&)> ResultCallback, const TArray<FOpenCLDeviceData>& DeviceGroup)
 {
+	//grab top level device for now
 
+	/*for (auto& Device : DeviceGroup)
+	{
+
+	}*/
+}
+
+void OpenCLPlugin::FreeDeviceMemory()
+{
+	Devices.Empty();
+
+	//Free each of our list of lists
+	for (auto DeviceList : DeviceIdsMemoryList)
+	{
+		free(DeviceList);
+	}
+	DeviceIdsMemoryList.Empty();
 }

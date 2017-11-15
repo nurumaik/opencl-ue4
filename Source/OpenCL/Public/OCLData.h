@@ -15,6 +15,9 @@ struct OPENCL_API FOpenCLDeviceData
 	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
 	FString DeviceId;
 
+	//used to actually run computation
+	void* RawDeviceId;
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "OpenCL Device Data")
 	FString Platform;
 
