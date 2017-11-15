@@ -39,15 +39,18 @@ namespace UnrealBuildTool.Rules
             string OpenCLLibrariesPath = Path.Combine(ThirdPartyPath, "OpenCL", "Lib");
             string NvidiaLibrariesPath = Path.Combine(OpenCLLibrariesPath, "NVIDIA", PlatformString);
             string IntelLibrariesPath = Path.Combine(OpenCLLibrariesPath, "Intel", PlatformString);
+            string AmdLibrariesPath = Path.Combine(OpenCLLibrariesPath, "AMD", PlatformString);
             if (Target.Platform == UnrealTargetPlatform.Win64 || Target.Platform == UnrealTargetPlatform.Win32)
             {
                 PublicAdditionalLibraries.Add(Path.Combine(NvidiaLibrariesPath, "OpenCL.lib"));
                 PublicAdditionalLibraries.Add(Path.Combine(IntelLibrariesPath, "OpenCL.lib"));
+                PublicAdditionalLibraries.Add(Path.Combine(AmdLibrariesPath, "OpenCL.lib"));
             }
             else if (Target.Platform == UnrealTargetPlatform.Mac)
             {
                 PublicAdditionalFrameworks.Add(new UEBuildFramework("OpenCL"));
             }
+            //Todo: add linux support
         }
     }
 }
