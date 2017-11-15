@@ -1,6 +1,9 @@
 OpenCL Plugin for Unreal Engine 4
 =============
 
+[![GitHub release](https://img.shields.io/github/release/getnamo/opencl-ue4.svg)](https://github.com/getnamo/opencl-ue4/releases)
+[![Github All Releases](https://img.shields.io/github/downloads/getnamo/opencl-ue4/total.svg)](https://github.com/getnamo/opencl-ue4/releases)
+
 Enables using OpenCL kernel from UE4. Supports both blueprint and C++.
 
 Forked from original work by [kwonoh](https://github.com/kwonoh/OpenCL.uplugin).
@@ -77,7 +80,6 @@ All suggestions for other platforms are welcome.
 Known Issues
 ----------------------
 
-----------------------
 * If you get an access error when calling ```clGetPlatformIDs``` during Debug, it is likely the intel platform causing problems. Solution: [https://software.intel.com/en-us/forums/opencl/topic/705036](https://software.intel.com/en-us/forums/opencl/topic/705036)
 
 Screenshots
