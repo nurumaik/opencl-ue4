@@ -1,5 +1,6 @@
 #include "OpenCLComponent.h"
 #include "EngineMinimal.h"
+#include "Async.h"
 #include "IOpenCLPlugin.h"
 
 UOpenCLComponent::UOpenCLComponent(const FObjectInitializer &init) : UActorComponent(init)
@@ -74,14 +75,16 @@ void UOpenCLComponent::WatchKernelFolder(const FString& ProjectRelativeFolder)
 		FTimespan Difference = FDateTime::Now() - LastWatchEventCall;
 
 		//Rate limit file change callbacks
-		if (Difference.GetTotalSeconds() > 0.1f)
+		if (Difference.GetTotalSeconds() > 0.5f)
 		{
-			for (auto Change : FileChanges)
-			{
-				FPaths::NormalizeFilename(Change.Filename);
-				OnKernelSourceChanged.Broadcast(Change.Filename, (EKernelFileChangeAction)Change.Action);
-			}
-			LastWatchEventCall = FDateTime::Now();
+			FFunctionGraphTask::CreateAndDispatchWhenReady([this, FileChanges]() {
+				for (auto Change : FileChanges)
+				{
+					FPaths::NormalizeFilename(Change.Filename);
+					OnKernelSourceChanged.Broadcast(Change.Filename, (EKernelFileChangeAction)Change.Action);
+				}
+				LastWatchEventCall = FDateTime::Now();
+			}, TStatId(), nullptr, ENamedThreads::GameThread);
 		}
 	});
 
