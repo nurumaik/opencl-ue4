@@ -33,10 +33,18 @@ TArray<FOpenCLDeviceData> UOpenCLComponent::EnumerateDevices()
 	return Devices;
 }
 
-FString UOpenCLComponent::ReadKernelFromFile(const FString& ProjectRelativePath)
+FString UOpenCLComponent::ReadKernelFromFile(const FString& FilePath, bool bIsContentRelative /*= true*/)
 {
-	FString AbsolutePath = FPaths::ProjectContentDir() + ProjectRelativePath;
-	
+	FString AbsolutePath;
+	if (bIsContentRelative)
+	{
+		AbsolutePath = FPaths::ProjectContentDir() + FilePath;
+	}
+	else
+	{
+		AbsolutePath = FilePath;
+	}
+
 	FString ResultString;
 	FFileHelper::LoadFileToString(ResultString, *AbsolutePath);
 	return ResultString;
@@ -122,7 +130,8 @@ void UOpenCLComponent::InitializeComponent()
 
 void UOpenCLComponent::UninitializeComponent()
 {	
-	for (auto Folder : WatchedFolders)
+	TArray<FString> AllWatched = WatchedFolders;
+	for (auto Folder : AllWatched)
 	{
 		UnwatchKernelFolder(Folder);
 	}

@@ -51,7 +51,7 @@ public:
 	TArray<FOpenCLDeviceData> EnumerateDevices();
 
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
-	FString ReadKernelFromFile(const FString& ProjectRelativePath);
+	FString ReadKernelFromFile(const FString& FilePath, bool bIsContentRelative = true);
 
 	/** Run specified kernel on the current device group with passed in arguments */
 	UFUNCTION(BlueprintCallable, Category = "OpenCL Functions")
