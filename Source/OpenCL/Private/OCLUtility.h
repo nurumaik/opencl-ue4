@@ -29,7 +29,7 @@ public:
 	static void ArrayFloatFromBytes(const TArray<uint8>& InBytes, TArray<float>& OutFloatArray);
 	static void ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>& OutIntArray);
 	static void ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray);
-	static void Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector2D& InSize, UTexture2D* OutTexture);
+	static UTexture2D* Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector2D& InSize);
 
 	//todo: possible optimization: casting array data?
 };

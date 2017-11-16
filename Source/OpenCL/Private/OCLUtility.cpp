@@ -180,10 +180,10 @@ void FOCLUtility::ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVec
 	}
 }
 
-void FOCLUtility::Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector2D& InSize, UTexture2D* OutTexture)
+UTexture2D* FOCLUtility::Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector2D& InSize)
 {
+	UTexture2D* OutTexture;
 	FVector2D Size;
-	UTexture2D* Pointer = UTexture2D::CreateTransient(InSize.X, InSize.Y, PF_R8G8B8A8);
 	int32 Pixels = InBytes.Num() / 16;	//4 bytes per pixel
 
 	//Create square image and lock for writing
@@ -192,7 +192,7 @@ void FOCLUtility::Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector
 		int32 Length = FMath::Pow(Pixels, 0.5);
 		if (Length * Length != Pixels)
 		{
-			UE_LOG(LogOpenCL, Warning, TEXT("Invalid bytes without specified size, needs to be square."));
+			UE_LOG(LogOpenCL, Warning, TEXT("Texture2DFromBytes::Invalid bytes without specified size, needs to be square."));
 		}
 		Size = FVector2D(Length, Length);
 	}
@@ -213,4 +213,5 @@ void FOCLUtility::Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector
 	//Unlock and Return data
 	OutTexture->PlatformData->Mips[0].BulkData.Unlock();
 	OutTexture->UpdateResource();
+	return OutTexture;
 }
