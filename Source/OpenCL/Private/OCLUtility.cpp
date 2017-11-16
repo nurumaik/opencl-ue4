@@ -20,7 +20,7 @@ void FOCLUtility::FStringToCharByteArray(const FString& InString, TArray<uint8>&
 
 void FOCLUtility::FloatToBytes(float InFloat, TArray<uint8>& OutBytes)
 {
-	//OutBytes
+	OutBytes.SetNum(4);
 	FloatUnion ValueUnion;
 	ValueUnion.f = InFloat;
 	OutBytes[0] = ValueUnion.buff[0];
@@ -29,7 +29,7 @@ void FOCLUtility::FloatToBytes(float InFloat, TArray<uint8>& OutBytes)
 	OutBytes[3] = ValueUnion.buff[3];
 }
 
-void FOCLUtility::IntToBytes(int32 InInt, TArray<uint8>& OutBytes)
+void FOCLUtility::Int32ToBytes(int32 InInt, TArray<uint8>& OutBytes)
 {
 	OutBytes.SetNum(4);
 	OutBytes[0] = (InInt >> 24);
@@ -49,6 +49,7 @@ void FOCLUtility::IntBigEndianToBytes(int32 InInt, TArray<uint8>& OutBytes)
 
 void FOCLUtility::VectorToBytes(const FVector& InVector, TArray<uint8>& OutBytes)
 {
+	OutBytes.Empty(12);
 	TArray<uint8> FloatArray;
 	FloatToBytes(InVector.X, FloatArray);
 	OutBytes.Append(FloatArray);
@@ -56,4 +57,75 @@ void FOCLUtility::VectorToBytes(const FVector& InVector, TArray<uint8>& OutBytes
 	OutBytes.Append(FloatArray);
 	FloatToBytes(InVector.Z, FloatArray);
 	OutBytes.Append(FloatArray);
+}
+
+void FOCLUtility::ArrayFloatToBytes(const TArray<float>& InFloatArray, TArray<uint8>& OutBytes)
+{
+	OutBytes.Reserve(InFloatArray.Num() * sizeof(float));
+
+	for (float Value : InFloatArray)
+	{
+		TArray<uint8> FloatBytes;
+		FloatToBytes(Value, FloatBytes);
+		OutBytes.Append(FloatBytes);
+	}
+}
+
+void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>& OutBytes)
+{
+	OutBytes.Reserve(InIntArray.Num() * sizeof(int32));
+
+	for (int32 Value : InIntArray)
+	{
+		TArray<uint8> IntBytes;
+		Int32ToBytes(Value, IntBytes);
+		OutBytes.Append(IntBytes);
+	}
+}
+
+void FOCLUtility::ArrayVectorToBytes(const TArray<FVector>& InVectorArray, TArray<uint8>& OutBytes)
+{
+	OutBytes.Reserve(InVectorArray.Num() * 12);	//3 floats of 4 bytes each
+
+	for (const FVector& Value : InVectorArray)
+	{
+		TArray<uint8> IntBytes;
+		VectorToBytes(Value, IntBytes);
+		OutBytes.Append(IntBytes);
+	}
+}
+
+float FOCLUtility::FloatFromBytes(const TArray<uint8>& InBytes)
+{
+	FloatUnion ValueUnion;
+	ValueUnion.buff[0] = InBytes[0];
+	ValueUnion.buff[1] = InBytes[1];
+	ValueUnion.buff[2] = InBytes[2];
+	ValueUnion.buff[3] = InBytes[3];
+	return ValueUnion.f;
+}
+
+int32 FOCLUtility::Int32FromBytes(const TArray<uint8>& InBytes)
+{
+	return int32((uint8)(InBytes[0]) << 24 |
+		(uint8)(InBytes[1]) << 16 |
+		(uint8)(InBytes[2]) << 8 |
+		(uint8)(InBytes[3]));
+}
+
+FVector FOCLUtility::VectorFromBytes(const TArray<uint8>& InBytes)
+{
+	//Todo: this can likely be optimized
+	FVector Value;
+	TArray<uint8> FloatBytes;
+	FloatBytes.Append(&InBytes[0], 4);
+	Value.X = FloatFromBytes(FloatBytes);
+	FloatBytes.Empty(4);
+	FloatBytes.Append(&InBytes[4], 4);
+	Value.Y = FloatFromBytes(FloatBytes);
+	FloatBytes.Empty(4);
+	FloatBytes.Append(&InBytes[8], 4);
+	Value.Z = FloatFromBytes(FloatBytes);
+
+	return Value;
 }
