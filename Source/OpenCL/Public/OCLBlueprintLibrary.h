@@ -15,4 +15,12 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Float Array)", BlueprintAutocast), Category = "Utilities|OpenCL")
 	static TArray<uint8> Conv_FloatToJsonValue(const TArray<float>& InFloatArray);
 
+
+private:
+
+	//Utility internal functions
+
+
+
+	//From Bytes
 };

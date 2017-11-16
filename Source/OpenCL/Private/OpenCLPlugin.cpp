@@ -181,7 +181,7 @@ void OpenCLPlugin::RunKernelOnDevices(const FString& KernelString, const FString
 	/* Create Kernel Program from the source */
 
 	//We need a separately allocated char array.
-	SourceCharArray = FOCLUtility::FStringToCharArray(KernelString);
+	FOCLUtility::FStringToCharByteArray(KernelString, SourceCharArray);
 
 	const size_t SourceLen = KernelString.Len();
 	const char* SourceStr = (char*)SourceCharArray.GetData();

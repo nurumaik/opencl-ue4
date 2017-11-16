@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OCLBlueprintLibrary.h"
+#include "OCLUtility.h"
 
 UOCLBlueprintLibrary::UOCLBlueprintLibrary(const FObjectInitializer &init) : UBlueprintFunctionLibrary(init)
 {
