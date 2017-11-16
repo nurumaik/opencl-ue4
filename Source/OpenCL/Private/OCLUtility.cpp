@@ -129,3 +129,45 @@ FVector FOCLUtility::VectorFromBytes(const TArray<uint8>& InBytes)
 
 	return Value;
 }
+
+void FOCLUtility::ArrayFloatFromBytes(const TArray<uint8>& InBytes, TArray<float>& OutFloatArray)
+{
+	int32 ValueSize = sizeof(float);
+	OutFloatArray.Reserve(InBytes.Num() / ValueSize);
+
+	TArray<uint8> ValueBytes;
+	for (int i=0; i<InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
+	{
+		ValueBytes.Empty(ValueSize);
+		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		OutFloatArray.Add(FloatFromBytes(ValueBytes));
+	}
+}
+
+void FOCLUtility::ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>& OutIntArray)
+{
+	int32 ValueSize = sizeof(int32);
+	OutIntArray.Reserve(InBytes.Num() / ValueSize);
+
+	TArray<uint8> ValueBytes;
+	for (int i = 0; i < InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
+	{
+		ValueBytes.Empty(ValueSize);
+		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		OutIntArray.Add(Int32FromBytes(ValueBytes));
+	}
+}
+
+void FOCLUtility::ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray)
+{
+	int32 ValueSize = 12;	//todo: confirm sizeof(FVector) == 12
+	OutVectorArray.Reserve(InBytes.Num() / ValueSize);
+
+	TArray<uint8> ValueBytes;
+	for (int i = 0; i < InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
+	{
+		ValueBytes.Empty(ValueSize);
+		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		OutVectorArray.Add(VectorFromBytes(ValueBytes));
+	}
+}

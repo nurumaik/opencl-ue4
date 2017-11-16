@@ -22,4 +22,8 @@ public:
 	static float FloatFromBytes(const TArray<uint8>& InBytes);
 	static int32 Int32FromBytes(const TArray<uint8>& InBytes);
 	static FVector VectorFromBytes(const TArray<uint8>& InBytes);
+
+	static void ArrayFloatFromBytes(const TArray<uint8>& InBytes, TArray<float>& OutFloatArray);
+	static void ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>& OutIntArray);
+	static void ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray);
 };
