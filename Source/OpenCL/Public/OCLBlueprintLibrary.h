@@ -13,14 +13,20 @@ class UOCLBlueprintLibrary : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Float Array)", BlueprintAutocast), Category = "Utilities|OpenCL")
-	static TArray<uint8> Conv_FloatToJsonValue(const TArray<float>& InFloatArray);
+	static TArray<uint8> Conv_FloatArrayToBytes(const TArray<float>& InFloatArray);
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Int Array)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<uint8> Conv_IntArrayToBytes(const TArray<int32>& InIntArray);
 
-private:
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Vector Array)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<uint8> Conv_VectorArrayToBytes(const TArray<FVector>& InVectorArray);
 
-	//Utility internal functions
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Float Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<float> Conv_BytesFloatArray(const TArray<uint8>& InBytes);
 
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Int32 Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<int32> Conv_BytesIntArray(const TArray<uint8>& InBytes);
 
-
-	//From Bytes
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Vector Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<FVector> Conv_BytesToArray(const TArray<uint8>& InBytes);
 };

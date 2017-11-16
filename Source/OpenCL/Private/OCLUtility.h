@@ -26,4 +26,6 @@ public:
 	static void ArrayFloatFromBytes(const TArray<uint8>& InBytes, TArray<float>& OutFloatArray);
 	static void ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>& OutIntArray);
 	static void ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray);
+
+	//todo: possible optimization: casting array data?
 };
