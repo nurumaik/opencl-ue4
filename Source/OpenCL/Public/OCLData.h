@@ -21,6 +21,9 @@ struct OPENCL_API FOpenCLDeviceData
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "OpenCL Device Data")
 	FString Platform;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "OpenCL Device Data")
+	FString PlatformExtensions;
+
 	UPROPERTY(BlueprintReadOnly, Category = "OpenCL Device Data")
 	FString HardwareVersion;
 

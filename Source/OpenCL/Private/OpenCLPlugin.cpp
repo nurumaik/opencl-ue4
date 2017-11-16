@@ -79,6 +79,16 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 		FString EnumeratedPlatform = FString(ANSI_TO_TCHAR(Value));
 		free(Value);
 
+		char ExtensionString[1024];
+		clGetPlatformInfo(Platforms[i],
+			CL_PLATFORM_EXTENSIONS,
+			sizeof(ExtensionString),
+			ExtensionString,
+			NULL);
+
+		FString PlatformExtensions = FString(ExtensionString);
+
+
 		// get all Devices
 		clGetDeviceIDs(Platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &NumDevices);
 		Devices = (cl_device_id*)malloc(sizeof(cl_device_id) * NumDevices);
@@ -90,6 +100,7 @@ void OpenCLPlugin::EnumerateDevices(TArray<FOpenCLDeviceData>& OutDevices, bool 
 		for (j = 0; j < NumDevices; j++) {
 			FOpenCLDeviceData Device;
 			Device.Platform = EnumeratedPlatform;
+			Device.PlatformExtensions = PlatformExtensions;
 			Device.DeviceId = FString::Printf(TEXT("%d"), ::PointerHash(Devices[j]));
 			Device.RawDeviceId = Devices[j];
 
