@@ -65,9 +65,9 @@ void FOCLUtility::ArrayFloatToBytes(const TArray<float>& InFloatArray, TArray<ui
 
 	for (float Value : InFloatArray)
 	{
-		TArray<uint8> FloatBytes;
-		FloatToBytes(Value, FloatBytes);
-		OutBytes.Append(FloatBytes);
+		TArray<uint8> ValueBytes;
+		FloatToBytes(Value, ValueBytes);
+		OutBytes.Append(ValueBytes);
 	}
 }
 
@@ -77,21 +77,21 @@ void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>
 
 	for (int32 Value : InIntArray)
 	{
-		TArray<uint8> IntBytes;
-		Int32ToBytes(Value, IntBytes);
-		OutBytes.Append(IntBytes);
+		TArray<uint8> ValueBytes;
+		Int32ToBytes(Value, ValueBytes);
+		OutBytes.Append(ValueBytes);
 	}
 }
 
 void FOCLUtility::ArrayVectorToBytes(const TArray<FVector>& InVectorArray, TArray<uint8>& OutBytes)
 {
-	OutBytes.Reserve(InVectorArray.Num() * 12);	//3 floats of 4 bytes each
+	OutBytes.Reserve(InVectorArray.Num() * sizeof(FVector));
+	TArray<uint8> ValueBytes;
 
 	for (const FVector& Value : InVectorArray)
 	{
-		TArray<uint8> IntBytes;
-		VectorToBytes(Value, IntBytes);
-		OutBytes.Append(IntBytes);
+		VectorToBytes(Value, ValueBytes);
+		OutBytes.Append(ValueBytes);
 	}
 }
 
@@ -139,7 +139,7 @@ void FOCLUtility::ArrayFloatFromBytes(const TArray<uint8>& InBytes, TArray<float
 	for (int i=0; i<InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
 	{
 		ValueBytes.Empty(ValueSize);
-		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		ValueBytes.Append(&InBytes[i], ValueSize);
 		OutFloatArray.Add(FloatFromBytes(ValueBytes));
 	}
 }
@@ -153,21 +153,21 @@ void FOCLUtility::ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>&
 	for (int i = 0; i < InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
 	{
 		ValueBytes.Empty(ValueSize);
-		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		ValueBytes.Append(&InBytes[i], ValueSize);
 		OutIntArray.Add(Int32FromBytes(ValueBytes));
 	}
 }
 
 void FOCLUtility::ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray)
 {
-	int32 ValueSize = 12;	//todo: confirm sizeof(FVector) == 12
+	int32 ValueSize = sizeof(FVector);
 	OutVectorArray.Reserve(InBytes.Num() / ValueSize);
 
 	TArray<uint8> ValueBytes;
 	for (int i = 0; i < InBytes.Num(); i += ValueSize)	//we need to hop ValueSize bytes at a time
 	{
 		ValueBytes.Empty(ValueSize);
-		ValueBytes.Append(InBytes.GetData(), ValueSize);
+		ValueBytes.Append(&InBytes[i], ValueSize);
 		OutVectorArray.Add(VectorFromBytes(ValueBytes));
 	}
 }

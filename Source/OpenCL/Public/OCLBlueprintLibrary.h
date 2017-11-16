@@ -46,7 +46,7 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Float Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
 	static TArray<float> Conv_BytesToFloatArray(const TArray<uint8>& InBytes);
 
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Int32 Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Int Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
 	static TArray<int32> Conv_BytesToIntArray(const TArray<uint8>& InBytes);
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Vector Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
