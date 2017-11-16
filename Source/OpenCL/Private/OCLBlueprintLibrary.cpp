@@ -85,3 +85,17 @@ TArray<FVector> UOCLBlueprintLibrary::Conv_BytesToArray(const TArray<uint8>& InB
 	FOCLUtility::ArrayVectorFromBytes(InBytes, Result);
 	return Result;
 }
+
+UTexture2D* UOCLBlueprintLibrary::Conv_BytesToTexture2D(const TArray<uint8>& InBytes, const FVector2D& InTextureSize)
+{
+	UTexture2D* Result = nullptr;
+	FOCLUtility::Texture2DFromBytes(InBytes, InTextureSize, Result);
+	return Result;
+}
+
+TArray<uint8> UOCLBlueprintLibrary::Conv_TextureToBytes(UTexture2D* InTexture)
+{
+	TArray<uint8> Result;
+	FOCLUtility::Texture2DToBytes(InTexture, Result);
+	return Result;
+}

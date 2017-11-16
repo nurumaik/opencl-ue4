@@ -51,4 +51,11 @@ public:
 
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Vector Array (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
 	static TArray<FVector> Conv_BytesToArray(const TArray<uint8>& InBytes);
+
+	//Textures
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Texture2D (Bytes)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static UTexture2D* Conv_BytesToTexture2D(const TArray<uint8>& InBytes, const FVector2D& InTextureSize);
+
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "To Bytes (Texture2D)", BlueprintAutocast), Category = "Utilities|OpenCL")
+	static TArray<uint8> Conv_TextureToBytes(UTexture2D* InTexture);
 };

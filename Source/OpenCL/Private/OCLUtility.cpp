@@ -1,5 +1,8 @@
 #include "OCLUtility.h"
 #include "CoreMinimal.h"
+#include "EngineMinimal.h"
+#include "IOpenCLPlugin.h"
+#include "RHI.h"
 #include <string>
 
 union FloatUnion
@@ -61,18 +64,14 @@ void FOCLUtility::VectorToBytes(const FVector& InVector, TArray<uint8>& OutBytes
 
 void FOCLUtility::ArrayFloatToBytes(const TArray<float>& InFloatArray, TArray<uint8>& OutBytes)
 {
-	OutBytes.Reserve(InFloatArray.Num() * sizeof(float));
-
-	for (float Value : InFloatArray)
-	{
-		TArray<uint8> ValueBytes;
-		FloatToBytes(Value, ValueBytes);
-		OutBytes.Append(ValueBytes);
-	}
+	int32 ByteCount = InFloatArray.Num() * sizeof(float);
+	OutBytes.Empty(ByteCount);
+	OutBytes.Append((uint8*)InFloatArray.GetData(), ByteCount);
 }
 
 void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>& OutBytes)
 {
+	//int32 have endian problems so must use this safer function
 	OutBytes.Reserve(InIntArray.Num() * sizeof(int32));
 
 	for (int32 Value : InIntArray)
@@ -85,14 +84,23 @@ void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>
 
 void FOCLUtility::ArrayVectorToBytes(const TArray<FVector>& InVectorArray, TArray<uint8>& OutBytes)
 {
-	OutBytes.Reserve(InVectorArray.Num() * sizeof(FVector));
-	TArray<uint8> ValueBytes;
+	int32 ByteCount = InVectorArray.Num() * sizeof(FVector);
+	OutBytes.Empty(ByteCount);
+	OutBytes.Append((uint8*)InVectorArray.GetData(), ByteCount);
+}
 
-	for (const FVector& Value : InVectorArray)
-	{
-		VectorToBytes(Value, ValueBytes);
-		OutBytes.Append(ValueBytes);
-	}
+void FOCLUtility::Texture2DToBytes(const UTexture2D* InTexture, TArray<uint8>& OutBytes)
+{
+	//RGBA texture, todo: generalize
+	int32 ByteCount = InTexture->GetSizeX()* InTexture->GetSizeY() * 4;
+	OutBytes.Reserve(ByteCount);	//RGBA, 4 bytes per pixel
+
+	//Lock the texture so it can be read
+	uint8* MipData = static_cast<uint8*>(InTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_ONLY));
+
+	OutBytes.Append(MipData, ByteCount);
+
+	InTexture->PlatformData->Mips[0].BulkData.Unlock();
 }
 
 float FOCLUtility::FloatFromBytes(const TArray<uint8>& InBytes)
@@ -170,4 +178,39 @@ void FOCLUtility::ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVec
 		ValueBytes.Append(&InBytes[i], ValueSize);
 		OutVectorArray.Add(VectorFromBytes(ValueBytes));
 	}
+}
+
+void FOCLUtility::Texture2DFromBytes(const TArray<uint8>& InBytes, const FVector2D& InSize, UTexture2D* OutTexture)
+{
+	FVector2D Size;
+	UTexture2D* Pointer = UTexture2D::CreateTransient(InSize.X, InSize.Y, PF_R8G8B8A8);
+	int32 Pixels = InBytes.Num() / 16;	//4 bytes per pixel
+
+	//Create square image and lock for writing
+	if (InSize == FVector2D(0, 0))
+	{
+		int32 Length = FMath::Pow(Pixels, 0.5);
+		if (Length * Length != Pixels)
+		{
+			UE_LOG(LogOpenCL, Warning, TEXT("Invalid bytes without specified size, needs to be square."));
+		}
+		Size = FVector2D(Length, Length);
+	}
+	else
+	{
+		Size = InSize;
+	}
+
+	OutTexture = UTexture2D::CreateTransient(Size.X, Size.Y, PF_R8G8B8A8);
+	uint8* MipData = static_cast<uint8*>(OutTexture->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE));
+
+	//Copy Data
+	for (int i = 0; i < InBytes.Num(); i++)
+	{
+		MipData[i] = InBytes[i];
+	}
+
+	//Unlock and Return data
+	OutTexture->PlatformData->Mips[0].BulkData.Unlock();
+	OutTexture->UpdateResource();
 }
