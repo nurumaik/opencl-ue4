@@ -17,11 +17,13 @@ Installation
 ### Windows
 
 1. Install NVIDIA, AMD Graphics Driver, or [Intel OpenCL runtime](https://software.intel.com/en-us/articles/opencl-drivers).
-2. Copy "OpenCL" folder to "Plugins" folder under your project directory.
+2. Browse to your project folder (typically found at Documents/Unreal Project/{Your Project Root})
+3. Copy Plugins folder into your Project root.
 
 ### OS X
 
-1. Copy "OpenCL" folder to "Plugins" folder under your project directory.
+1. Browse to your project folder
+2. Copy Plugins folder into your Project root.
 
 ### C++ extra steps
 3. Add "OpenCL" under "PublicDependencyModuleNames" in your *.Build.cs file to include header files from your project.
