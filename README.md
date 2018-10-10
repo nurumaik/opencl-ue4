@@ -73,11 +73,7 @@ That's more or less it for blueprint use for v0.3. You have access to the whole 
 Supported Platform
 ----------------------
 
-Tested on windows UE 4.18.
-
-Older version Tested on Unreal Engine 4.7.6 in OS X, Windows on Intel CPU/GPU, NVIDIA GPU.
-I've tested on OS X 10.10.3 (Intel Ivy Bridge, GT 650M, GTX 980) and Windows 8.1.
-All suggestions for other platforms are welcome.
+See https://github.com/getnamo/opencl-ue4/releases. If you're version isn't listed it can probably still be recompiled without code changes.
 
 Known Issues
 ----------------------
