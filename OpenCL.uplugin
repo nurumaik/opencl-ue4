@@ -7,8 +7,8 @@
 	"CreatedByURL" : "https://github.com/kwonoh/OpenCL-UE4Plugin",
 	"DocsURL" : "https://github.com/getnamo/opencl-ue4",
 	"Description" : "OpenCL Plugin",
-  "Category": "Computing",
-  "CanContainContent": true,
+	"Category": "Computing",
+	"CanContainContent": true,
 	"EnabledByDefault" : true,
 	"Modules" :
 	[
