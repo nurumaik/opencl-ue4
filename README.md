@@ -44,7 +44,8 @@ Run a kernel either directly from string source
 
 ![run inline](https://i.imgur.com/JjbHOEw.png)
 
-or from a file, default expected location is *{project root}/Content/Kernels*
+or from a file, default expected location is *{project root}/Content/Kernels*. Here's an example [```hello.cl``` kernel]( https://gist.github.com/getnamo/5c2c3a883dcad603b1232d46697c953a)
+
 
 ![run from file](https://i.imgur.com/6uqXev6.png)
 
@@ -57,7 +58,6 @@ for example print out the result string
 ![print results](https://i.imgur.com/lBOn1xr.png)
 
 Note that kernel compile errors will be logged to your Output log, which should make development easy.
-
 ![kernel compile](https://i.imgur.com/xrBCO3s.png)
 
 To improve the development loop further the plugin contains a convenience ```OpenCLDevActor``` where you can specify a filename and kernel function name and upon play it will watch that file in *{project root}/Content/Kernels*. This means you can open your favorite text editor
