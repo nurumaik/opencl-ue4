@@ -71,9 +71,8 @@ void FOCLUtility::ArrayFloatToBytes(const TArray<float>& InFloatArray, TArray<ui
 
 void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>& OutBytes)
 {
-	//int32 have endian problems so must use this safer function
-	OutBytes.Reserve(InIntArray.Num() * sizeof(int32));
-
+	int32 ByteCount = InIntArray.Num() * sizeof(int32);
+	OutBytes.Empty(ByteCount);
 	for (int32 Value : InIntArray)
 	{
 		TArray<uint8> ValueBytes;
