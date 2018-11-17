@@ -60,7 +60,7 @@ void FOCLUtility::VectorToBytes(const FVector& InVector, TArray<uint8>& OutBytes
 	OutBytes.Append(FloatArray);
 	FloatToBytes(InVector.Z, FloatArray);
 	OutBytes.Append(FloatArray);
-	//On GPU float3 equals float4. We need 14 bytes size.
+	//On GPU float3 equals float4. We need 16 bytes size.
 	BytesFromFloat(0.0f, FloatArray);
 	OutBytes.Append(FloatArray);
 }
@@ -86,7 +86,7 @@ void FOCLUtility::ArrayIntToBytes(const TArray<int32>& InIntArray, TArray<uint8>
 
 void FOCLUtility::ArrayVectorToBytes(const TArray<FVector>& InVectorArray, TArray<uint8>& OutBytes)
 {
-	//On GPU float3 equals float4. We need 14 bytes size.
+	//On GPU float3 equals float4. We need 16 bytes size.
 	OutBytes.Empty();
 	for (FVector Vector : InVectorArray) {
 		TArray<uint8> VectorBytes;
@@ -174,7 +174,7 @@ void FOCLUtility::ArrayIntFromBytes(const TArray<uint8>& InBytes, TArray<int32>&
 
 void FOCLUtility::ArrayVectorFromBytes(const TArray<uint8>& InBytes, TArray<FVector>& OutVectorArray)
 {
-	//On GPU float3 equals float4. We need 14 bytes size.
+	//On GPU float3 equals float4. We need 16 bytes size.
 	int32 ValueSize = sizeof(float) * 4;
 	OutVectorArray.Reserve(InBytes.Num() / ValueSize);
 
