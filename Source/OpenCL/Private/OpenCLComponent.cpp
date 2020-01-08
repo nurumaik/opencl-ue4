@@ -1,5 +1,5 @@
 #include "OpenCLComponent.h"
-#include "EngineMinimal.h"
+#include "Engine.h"
 #include "Async.h"
 #include "IOpenCLPlugin.h"
 
