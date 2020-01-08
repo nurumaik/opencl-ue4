@@ -18,8 +18,8 @@ namespace UnrealBuildTool.Rules
 
         public OpenCL(ReadOnlyTargetRules Target) : base(Target)
         {
-            //PCHUsage = PCHUsageMode.NoSharedPCHs;
-            PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+            PCHUsage = PCHUsageMode.NoSharedPCHs;
+            //PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
             PublicIncludePaths.AddRange(new string[] {
                 "OpenCL/Public",
@@ -33,7 +33,7 @@ namespace UnrealBuildTool.Rules
                     "CoreUObject",
                     "Engine",
                     "RenderCore",
-                    "ShaderCore",
+                    //"ShaderCore",
                     "RHI"
                 }
                 );
